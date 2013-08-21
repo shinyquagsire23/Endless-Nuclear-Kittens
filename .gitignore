@@ -34,6 +34,13 @@ nbproject
 *.iws
 .idea/
 
+*.png
+*.wav
+.classpath
+*.so
+*.*~
+
+
 # server files
 Minecraft.Server/banned-ips.txt
 Minecraft.Server/banned-players.txt

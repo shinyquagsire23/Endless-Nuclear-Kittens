@@ -17,7 +17,8 @@ public class Game extends BasicGame {
     public static Font FONT_MENU;
     public static Font FONT_LARGE;
     public static Font[] FONT_SCORES = new Font[5];
-    public static final Vector2f SCREENSIZE = new Vector2f(1024, 768);
+    public static boolean fullscreen = false;
+    public static Vector2f SCREENSIZE = new Vector2f(1024, 768);
 
     public static final int SOUND_BLASTER = 0;
     public static final int SOUND_EXPLOSION = 1;
@@ -101,7 +102,7 @@ public class Game extends BasicGame {
         sounds[SOUND_PICKUP] = new Sound("item_pickup.wav");
     }
 
-    private static ByteBuffer loadIcon(URL url) throws IOException {
+    private static ByteBuffer loadIcon(URL url) throws IOException, NullPointerException {
         InputStream fileInputStream = url.openStream();
         try {
             PNGDecoder decoder = new PNGDecoder(fileInputStream);
@@ -192,30 +193,30 @@ public class Game extends BasicGame {
             g.setColor(new Color(0.0f, 0.1f, 0.2f, 0.6f));
             g.fillRect(0, 0, SCREENSIZE.x, SCREENSIZE.y);
             g.scale(2f, 2f);
-            g.drawImage(title, 0, -10 + (hasStarted && active ? -20 : 0));
+            g.drawImage(title, SCREENSIZE.x / 4 - title.getWidth() / 2, -10 + (hasStarted && active ? -20 : 0));
             g.scale(1 / 2f, 1 / 2f);
             g.setColor(Color.white);
             g.setFont(FONT_MENU);
             if (!active) {
-                drawStringCentered(g, "-- paused --", 512, 600);
-                drawStringCentered(g, "(the kittens are waiting)", 512, 630);
+                drawStringCentered(g, "-- paused --", SCREENSIZE.x / 2, 600);
+                drawStringCentered(g, "(the kittens are waiting)", SCREENSIZE.x / 2, 630);
             } else {
                 float y = 580;
                 float jump = 30;
                 if (hasStarted) {
                     y -= 75;
-                    drawStringCentered(g, "OH NO! TOO MANY KITTENS!", 512, y);
+                    drawStringCentered(g, "OH NO! TOO MANY KITTENS!", SCREENSIZE.x / 2, y);
                     y += jump;
-                    drawStringCentered(g, "SCORE: " + world.getScore(), 512, y);
+                    drawStringCentered(g, "SCORE: " + world.getScore(), SCREENSIZE.x / 2, y);
                     y += jump * 1.8f;
                 }
-                drawStringCentered(g, "In the year " + year + ", kittens are", 512, y);
+                drawStringCentered(g, "In the year " + year + ", kittens are", SCREENSIZE.x / 2, y);
                 y += jump;
-                drawStringCentered(g, randomWord + ".", 512, y);
+                drawStringCentered(g, randomWord + ".", SCREENSIZE.x / 2, y);
                 y += jump * 1.8f;
-                drawStringCentered(g, "Therefore, they must die.", 512, y);
+                drawStringCentered(g, "Therefore, they must die.", SCREENSIZE.x / 2, y);
                 y += jump;
-                drawStringCentered(g, "[click to begin]", 512, y);
+                drawStringCentered(g, "[click to begin]", SCREENSIZE.x / 2, y);
                 y += jump;
             }
         }
@@ -232,19 +233,26 @@ public class Game extends BasicGame {
 
     public static void main(String[] args) throws SlickException {
         AppGameContainer app = new AppGameContainer(INSTANCE);
+        for(String s : args)
+        {
+        	if(s.equalsIgnoreCase("-f") || s.equalsIgnoreCase("--fullscreen"))
+        		fullscreen = true;
+        }
 
-        try {
+       try {
             Display.setIcon(new ByteBuffer[]{
                     loadIcon(Game.class.getClassLoader().getResource("128.png")),
                     loadIcon(Game.class.getClassLoader().getResource("64.png")),
                     loadIcon(Game.class.getClassLoader().getResource("32.png")),
                     loadIcon(Game.class.getClassLoader().getResource("16.png")),
             });
-        } catch (IOException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
-
-        app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, false);
+       
+        if(fullscreen)
+        	SCREENSIZE = new Vector2f(app.getScreenWidth(), app.getScreenHeight());
+        app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
         app.start();
     }
 }
