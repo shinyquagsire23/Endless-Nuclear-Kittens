@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist SYSTEM "file://localhost/System/Library/DTDs/PropertyList.dtd">
+<plist version="1.0">
+  <dict>
+    <key>CFBundleDevelopmentRegion</key> <string>en</string>
+    <key>CFBundleName</key> <string>EndlessNuclearKittens</string>
+    <key>CFBundleVersion</key> <string>1.0</string>
+    <key>CFBundleShortVersionString</key> <string>EndlessNuclearKittens 1.0</string>
+    <key>CFBundleExecutable</key> <string>JavaApplicationStub</string>
+    <key>CFBundlePackageType</key> <string>APPL</string>
+    <key>CFBundleSignature</key> <string>????</string>
+    <key>CFBundleGetInfoString</key> <string>EndlessNuclearKittens 1.0, Mojam 2012, Team Giraffemacka</string>
+    <key>CFBundleIconFile</key> <string>favicon.icns</string>
+    <key>CFBundleAllowMixedLocalizations</key> <true/>
+    <key>CFBundleInfoDictionaryVersion</key> <string>6.0</string>
+    <key>CFBundleIdentifier</key> <string>com.mojang.mojam.EndlessNuclearKittens</string>
+    <key>LSHasLocalizedDisplayName</key> <true/>
+    <key>CFBundleDisplayName</key> <string>EndlessNuclearKittens</string>
+    <key>Java</key>
+    <dict>
+      <key>MainClass</key> <string>com.mojang.mojam.giraffe.Game</string>
+      <key>ClassPath</key> <string>$APP_PACKAGE/Contents/Resources/Java/EndlessNuclearKittens.jar:$APP_PACKAGE/Contents/Resources/Java/jinput.jar:$APP_PACKAGE/Contents/Resources/Java/lwjgl.jar:$APP_PACKAGE/Contents/Resources/Java/slick.jar:$APP_PACKAGE/Contents/Resources/Java/lwjgl.jar</string>
+      <key>Properties</key>
+      <dict>
+        <key>sun.java2d.noddraw</key> <string>true</string>
+        <key>sun.java2d.d3d</key> <string>false</string>
+        <key>sun.java2d.opengl</key> <string>false</string>
+        <key>sun.java2d.pmoffscreen</key> <string>false</string>
+        <key>sun.java2d.pmoffscreen</key> <string>false</string>
+        <key>java.library.path</key> <string>$APP_PACKAGE/Contents/Resources/Java/</string>
+      </dict>
+      <key>VMOptions</key> <string>-Xms512M -Xmx1024M</string>
+      <key>JVMVersion</key> <string>1.6+</string>
+    </dict>
+  </dict>
+</plist>

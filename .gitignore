@@ -1,0 +1,44 @@
+.svn/
+
+# Eclipse stuff
+.classpath
+.project
+.settings/
+
+# netbeans
+nbproject
+
+# maven
+/*/target/
+
+# gradle
+.gradle/
+
+# vim
+.*.sw[a-p]
+
+# various other potential build files
+/build/
+/buildassets/map_*.txt
+/bin/
+/dist/
+/manifest.mf
+/release
+
+# Mac filesystem dust
+.DS_Store
+
+# intellij
+*.iml
+*.ipr
+*.iws
+.idea/
+
+# server files
+Minecraft.Server/banned-ips.txt
+Minecraft.Server/banned-players.txt
+Minecraft.Server/ops.txt
+Minecraft.Server/server.log
+Minecraft.Server/server.properties
+Minecraft.Server/white-list.txt
+Minecraft.Server/world/

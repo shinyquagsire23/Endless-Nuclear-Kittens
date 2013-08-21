@@ -1,0 +1,247 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+
+archivesBaseName = 'EndlessNuclearKittens'
+
+sourceCompatibility = 1.6
+
+repositories {
+    mavenCentral()
+    maven {
+        url 'http://repo.dev.mojang:80/content/groups/public/'
+    }
+}
+
+project.ext.with {
+    set('packageDir', new File(buildDir, 'package'));
+    set('osxDmgRoot', new File(buildDir, 'dmg'));
+    set('shadeDir', new File(buildDir, 'shade'));
+    set('shadeOsxDir', new File(buildDir, 'shadeOsx'));
+    set('launch4jDir', new File(buildDir, 'launch4j'))
+    set('nativesDir', new File(buildDir, "natives"))
+}
+
+dependencies {
+    compile fileTree(dir: 'lib', include: '*.jar')
+    compile 'org.lwjgl.lwjgl:lwjgl:2.8.5'
+    testCompile 'junit:junit:4.11'
+    testCompile 'org.mockito:mockito-core:1.9.5'
+    testCompile 'org.hamcrest:hamcrest-core:1.3'
+    testCompile 'org.hamcrest:hamcrest-library:1.3'
+}
+
+task(run, dependsOn: 'classes', type: JavaExec) {
+    jvmArgs = ['-Djava.library.path=lib/native/windows']
+    main = 'com.mojang.mojam.giraffe.Game'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+task(debug, dependsOn: 'classes', type: JavaExec) {
+    jvmArgs = ['-Djava.library.path=lib/native/windows']
+    main = 'com.mojang.mojam.giraffe.Game'
+    classpath = sourceSets.main.runtimeClasspath
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': 'com.mojang.mojam.giraffe.Game'
+    }
+}
+
+task unpackNatives {
+    description 'Copies native libraries to an appropriate directory.'
+
+    project.nativesDir.mkdirs()
+
+    inputs.files(configurations.compile)
+
+    doLast {
+        ['windows', 'linux', 'osx'].collect { os ->
+            def target = new File(project.nativesDir, os)
+            target.mkdirs()
+            copy {
+                configurations.compile.resolvedConfiguration.resolvedArtifacts.findAll {
+                    it.classifier != null && it.classifier == 'natives-' + os
+                }.collect {
+                    from zipTree(it.file)
+                }
+                into target
+                exclude 'META-INF/**'
+            }
+        }
+    }
+}
+
+task shade(type: Zip, dependsOn: 'jar') {
+    archiveName = jar.archiveName
+    destinationDir = project.shadeDir
+
+    project.shadeDir.mkdirs()
+    from zipTree(jar.archivePath)
+    from {
+        fileTree('lib').include('**/*.jar').collect {
+            zipTree(it).matching { exclude 'META-INF/**' }
+        }
+    }
+    from {
+        configurations.runtime.resolvedConfiguration.resolvedArtifacts.findAll {
+            it.classifier == null
+        }.collect {
+            zipTree(it.file).matching { exclude 'META-INF/**' }
+        }
+    }
+}
+
+task shadeOsx(type: Zip, dependsOn: 'jar') {
+    archiveName = jar.archiveName
+    destinationDir = project.shadeOsxDir
+
+    project.shadeOsxDir.mkdirs()
+    from zipTree(jar.archivePath)
+    from {
+        fileTree('lib').include('**/*.jar').collect {
+            zipTree(it).matching { exclude 'META-INF/**' }
+        }
+    }
+    // Special lwjgl for osx :(
+    from {
+        zipTree('buildassets/osx/lwjgl.jar').matching { exclude 'META-INF/**' }
+    }
+    from {
+        configurations.runtime.resolvedConfiguration.resolvedArtifacts.findAll {
+            // Exclude lwjgl -- we pack it manually
+            it.classifier == null && it.name != 'lwjgl'
+        }.collect {
+            zipTree(it.file).matching { exclude 'META-INF/**' }
+        }
+    }
+}
+
+task buildExe(dependsOn: ['shade']) {
+    description "Build executable for windows"
+
+    doLast {
+        project.launch4jDir.mkdirs()
+
+        def env = System.getenv()['LAUNCH4J_HOME']
+        def launch = env == null ? null : new File(env)
+        def launch4j = launch == null ? null : new File(launch, 'launch4j')
+        if (launch == null || !launch.exists() || !launch.isDirectory()) {
+            if (launch4j == null || !launch4j.exist()) {
+                println "Skipping creation of exe -- didn't get LAUNCH4J_HOME (or not folder)"
+                println launch
+                return
+            }
+        }
+
+        copy {
+            from 'buildassets/favicon.ico'
+            from 'buildassets/EndlessNuclearKittens.xml'
+            from new File(project.shadeDir, jar.archiveName)
+
+            into project.launch4jDir
+        }
+
+        exec {
+            workingDir project.launch4jDir
+            executable launch4j.absolutePath
+            args new File(project.launch4jDir, 'EndlessNuclearKittens.xml').absolutePath
+        }
+    }
+}
+
+task distWindows(type: Zip, dependsOn: ['buildExe', 'unpackNatives']) {
+    archiveName = "EndlessNuclearKittens.windows.zip"
+    destinationDir = project.packageDir
+
+    from(project.launch4jDir) {
+        include '*.exe'
+    }
+    from(new File(project.nativesDir, 'windows')) {
+        include '*.*'
+    }
+}
+
+task distOsx(type:Zip, dependsOn: 'gatherOsx') {
+    description 'Create the mac.app zipfile'
+
+    archiveName = "EndlessNuclearKittens.osx.zip"
+    destinationDir = project.packageDir
+
+    from(project.osxDmgRoot) {
+        include 'EndlessNuclearKittens.app/**'
+    }
+}
+
+task gatherOsx(dependsOn: 'shadeOsx') {
+    description 'Gather all the files for the osx dmg'
+
+    doLast {
+        project.osxDmgRoot.mkdirs()
+        copy {
+            from ('buildassets/osx/') {
+                include 'EndlessNuclearKittens.app/**'
+            }
+            from(new File(project.shadeOsxDir, jar.archiveName)) {
+                into 'EndlessNuclearKittens.app/Contents/Resources/Java'
+            }
+            from('buildassets/osx/natives/') {
+                into 'EndlessNuclearKittens.app/Contents/Resources/Java'
+            }
+            into project.osxDmgRoot
+        }
+    }
+}
+
+task createDmg(dependsOn: 'gatherOsx') {
+    project.packageDir.mkdirs()
+    doLast {
+        if (System.getProperty("os.name").toLowerCase().indexOf('mac') == -1) {
+            println "Not running on OSX, unable to make proper dmg. Making zip with files instead!"
+            tasks.distOsx.execute()
+            return
+        }
+
+        exec {
+            workingDir new File(projectDir, "buildassets")
+            executable "/bin/bash"
+            args "dmgCreate.sh"
+        }
+
+        copy {
+            from(project.osxDmgRoot) {
+                include '*.dmg'
+            }
+            into project.packageDir
+        }
+    }
+}
+
+task distLinux(type: Tar, dependsOn: ['shade', 'unpackNatives']) {
+    compression = Compression.GZIP
+    archiveName = "EndlessNuclearKittens.linux.tar.gz"
+    destinationDir = project.packageDir
+
+    into(project.name) {
+        from new File(project.shadeDir, jar.archiveName)
+        from(new File(project.nativesDir, 'linux')) {
+            include '*.*'
+        }
+        from('buildassets/EndlessNuclearKittens.sh') {
+            fileMode = 0755
+        }
+    }
+}
+
+task archiveSource(dependsOn: 'jar') {
+    doLast {
+        project.packageDir.mkdirs()
+        exec {
+            executable 'git'
+            args 'archive', 'HEAD', '--format=zip', '-o', new File(project.packageDir, 'EndlessNuclearKittens.src.zip').absolutePath
+        }
+    }
+}
+
+task makeDist(dependsOn: ['distLinux', 'distWindows', 'createDmg', 'archiveSource']) {
+}
