@@ -1,7 +1,10 @@
 package com.mojang.mojam.giraffe;
 
 import com.mojang.mojam.giraffe.entity.Mattis;
+
 import org.lwjgl.opengl.Display;
+import org.minegaming.zzl.engine.IGameObject;
+import org.minegaming.zzl.engine.ScreenManager;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.PNGDecoder;
@@ -9,6 +12,7 @@ import org.newdawn.slick.util.ResourceLoader;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigInteger;
 import java.net.URL;
 import java.nio.ByteBuffer;
 
@@ -17,7 +21,7 @@ public class Game extends BasicGame {
     public static Font FONT_MENU;
     public static Font FONT_LARGE;
     public static Font[] FONT_SCORES = new Font[5];
-    public static boolean fullscreen = false;
+    public static boolean fullscreen = true;
     public static Vector2f SCREENSIZE = new Vector2f(1024, 768);
 
     public static final int SOUND_BLASTER = 0;
@@ -30,32 +34,33 @@ public class Game extends BasicGame {
     public static final int SOUND_BULLET_HIT = 7;
     public static final int SOUND_PICKUP = 8;
     private static Sound[] sounds = new Sound[9];
+    
+    private static Image starfield;
+    private static Image[] stars = new Image[3];
 
-    private Mattis mattis;
-    private World world;
+    private static Mattis mattis;
+    private static World world;
 
-    private Spawner spawner;
-    private Input input;
-    private Image cursor;
 
-    private boolean hasStarted = false;
-    private boolean gameRunning = false;
+    public static Input input;
+    public static Image cursor;
+
+    public static boolean hasStarted = false;
+    public static boolean gameRunning = false;
 
     public static final Game INSTANCE = new Game();
-
-    private Image title;
-    private Image starfield;
-    private Image[] stars = new Image[3];
-
-    private int year;
-    private String randomWord;
 
     private Game() {
         super("Endless Nuclear Kittens <3");
     }
 
-    public World getWorld() {
+    public static World getWorld() {
         return world;
+    }
+    
+    public static Mattis getMattis()
+    {
+    	return mattis;
     }
 
     @Override
@@ -85,7 +90,6 @@ public class Game extends BasicGame {
         FONT_MENU = new TrueTypeFont(ttfFont.deriveFont(java.awt.Font.BOLD, 24), true);
         FONT_LARGE = new TrueTypeFont(ttfFont.deriveFont(java.awt.Font.BOLD, 32), true);
 
-        title = Util.loadImage("title_endlessnuclearkittens.png");
         starfield = Util.loadImage("stars_01.png");
         stars[0] = Util.loadImage("stars_02.png", Color.white);
         stars[1] = Util.loadImage("stars_03.png", Color.white);
@@ -100,6 +104,9 @@ public class Game extends BasicGame {
         sounds[SOUND_CHAIN_EXPLOSION] = new Sound("chain_explosion.wav");
         sounds[SOUND_BULLET_HIT] = new Sound("bullet_hit.wav");
         sounds[SOUND_PICKUP] = new Sound("item_pickup.wav");
+        
+        for(IGameObject g : ScreenManager.getScreens())
+        	g.init();
     }
 
     private static ByteBuffer loadIcon(URL url) throws IOException, NullPointerException {
@@ -125,53 +132,37 @@ public class Game extends BasicGame {
 
     @Override
     public void update(GameContainer gc, int delta) throws SlickException {
+    	ScreenManager.Update(delta);
         if (!gc.hasFocus() || delta > 1000) {
             return; //If the game isn't focus or the last frame took longer than 1 second to render, skip this one
         }
-        if (gameRunning) {
-            gameRunning = !world.update(delta);
-            spawner.update(delta);
-            mattis.handleInput(input, world);
-            if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) ; //DUMMY MOUSEPRESS CALL - HACK!
-        } else {
-            if (input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) {
-                reset();
-                gameRunning = true;
-                hasStarted = true;
-            }
-        }
+
         if (input.isKeyPressed(Input.KEY_ESCAPE)) {
             System.exit(0);
         }
     }
 
-    private void reset() {
-        year = 2300 + (int) (Math.random() * 300);
-        double rnd = Math.random();
-        if (rnd < 0.2) {
-            randomWord = "the new earth overlords";
-        } else if (rnd < 0.4) {
-            randomWord = "still cute and cuddly";
-        } else if (rnd < 0.6) {
-            randomWord = "the spawn of the devil";
-        } else if (rnd < 0.7) {
-            randomWord = "an evil little bunch";
-        } else if (rnd < 0.8) {
-            randomWord = "the most beautiful things";
-        } else if (rnd < 0.9) {
-            randomWord = "collectors of souls";
-        } else {
-            randomWord = "made of love";
-        }
+    public static void reset()
+    {
         mattis = new Mattis(300, 250, SCREENSIZE);
         world = new World(SCREENSIZE, mattis);
-        spawner = new Spawner(world, mattis);
+    	ScreenTitle.reset();
+    	ScreenGame.reset();
+    	ScreenEnd.reset();
     }
 
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException {
-        g.setFont(FONT);
+        ScreenManager.Draw(g);
         g.scale(2, 2);
+        g.setColor(Color.white);
+        g.drawImage(Game.cursor, Game.input.getAbsoluteMouseX() / 2.0f - Game.cursor.getWidth() / 2, Game.input.getAbsoluteMouseY() / 2.0f - Game.cursor.getHeight() / 2);
+        g.scale(1 / 2f, 1 / 2f);
+    }
+
+    public static void drawWorld(Graphics g)
+    {
+		g.setFont(Game.FONT);
         for (int x = 0; x < 4; x++) {
             for (int y = 0; y < 3; y++) {
                 g.drawImage(starfield, x * 256, y * 256);
@@ -185,48 +176,14 @@ public class Game extends BasicGame {
             }
         }
         world.draw(g);
-        g.scale(1 / 2f, 1 / 2f);
-        g.setFont(FONT_MENU);
-        g.drawString("SCORE: " + world.getScore(), 10, 10);
-        boolean active = gc.hasFocus();
-        if (!gameRunning || !active) {
-            g.setColor(new Color(0.0f, 0.1f, 0.2f, 0.6f));
-            g.fillRect(0, 0, SCREENSIZE.x, SCREENSIZE.y);
-            g.scale(2f, 2f);
-            g.drawImage(title, SCREENSIZE.x / 4 - title.getWidth() / 2, -10 + (hasStarted && active ? -20 : 0));
-            g.scale(1 / 2f, 1 / 2f);
-            g.setColor(Color.white);
-            g.setFont(FONT_MENU);
-            if (!active) {
-                drawStringCentered(g, "-- paused --", SCREENSIZE.x / 2, 600);
-                drawStringCentered(g, "(the kittens are waiting)", SCREENSIZE.x / 2, 630);
-            } else {
-                float y = 580;
-                float jump = 30;
-                if (hasStarted) {
-                    y -= 75;
-                    drawStringCentered(g, "OH NO! TOO MANY KITTENS!", SCREENSIZE.x / 2, y);
-                    y += jump;
-                    drawStringCentered(g, "SCORE: " + world.getScore(), SCREENSIZE.x / 2, y);
-                    y += jump * 1.8f;
-                }
-                drawStringCentered(g, "In the year " + year + ", kittens are", SCREENSIZE.x / 2, y);
-                y += jump;
-                drawStringCentered(g, randomWord + ".", SCREENSIZE.x / 2, y);
-                y += jump * 1.8f;
-                drawStringCentered(g, "Therefore, they must die.", SCREENSIZE.x / 2, y);
-                y += jump;
-                drawStringCentered(g, "[click to begin]", SCREENSIZE.x / 2, y);
-                y += jump;
-            }
-        }
-        g.scale(2, 2);
-        g.setColor(Color.white);
-        g.drawImage(cursor, input.getAbsoluteMouseX() / 2.0f - cursor.getWidth() / 2, input.getAbsoluteMouseY() / 2.0f - cursor.getHeight() / 2);
-        g.scale(1 / 2f, 1 / 2f);
     }
-
-    private void drawStringCentered(Graphics g, String string, float x, float y) {
+    
+    public static BigInteger getScore()
+    {
+    	return world.getScore();
+    }
+    
+    public static void drawStringCentered(Graphics g, String string, float x, float y) {
         float width = FONT_MENU.getWidth(string);
         g.drawString(string, (int) (x - width / 2), y);
     }
@@ -252,6 +209,10 @@ public class Game extends BasicGame {
        
         if(fullscreen)
         	SCREENSIZE = new Vector2f(app.getScreenWidth(), app.getScreenHeight());
+        
+        ScreenManager.AddScreen("title", new ScreenTitle());
+        ScreenManager.AddScreen("game", new ScreenGame());
+        ScreenManager.ChangeState("title");
         app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
         app.start();
     }

@@ -62,7 +62,7 @@ public class World {
         this.mattis = mattis;
         pickupSpawner = new PickupSpawner(mattis);
 
-        bounds = new Rectangle(0, 0, 256 * 3, 256 * 2);
+        bounds = new Rectangle(0, 0, 256 * 4, 256 * 2);
         cam.x = seekCam.x = -screensize.x / 4.0f + mattis.getX();
         cam.y = seekCam.y = -screensize.y / 4.0f + mattis.getY();
 
