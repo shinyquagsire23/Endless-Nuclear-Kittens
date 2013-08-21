@@ -137,7 +137,7 @@ public class Game extends BasicGame {
             return; //If the game isn't focus or the last frame took longer than 1 second to render, skip this one
         }
 
-        if (input.isKeyPressed(Input.KEY_ESCAPE)) {
+        if (input.isKeyPressed(Input.KEY_END)) {
             System.exit(0);
         }
     }
@@ -148,7 +148,6 @@ public class Game extends BasicGame {
         world = new World(SCREENSIZE, mattis);
     	ScreenTitle.reset();
     	ScreenGame.reset();
-    	ScreenEnd.reset();
     }
 
     @Override
@@ -212,6 +211,8 @@ public class Game extends BasicGame {
         
         ScreenManager.AddScreen("title", new ScreenTitle());
         ScreenManager.AddScreen("game", new ScreenGame());
+        ScreenManager.AddScreen("pause", new ScreenPaused());
+        ScreenManager.AddScreen("end", new ScreenEnd());
         ScreenManager.ChangeState("title");
         app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
         app.start();

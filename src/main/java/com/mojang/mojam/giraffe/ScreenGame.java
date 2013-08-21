@@ -1,22 +1,30 @@
 package com.mojang.mojam.giraffe;
 
+import org.lwjgl.input.Keyboard;
 import org.minegaming.zzl.engine.IGameObject;
 import org.minegaming.zzl.engine.ScreenManager;
+import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 
 public class ScreenGame implements IGameObject
 {
     private static Spawner spawner;
+    private boolean active = true;
     
 	@Override
 	public void Update(int delta)
 	{
-		if (Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON));
-		if(!Game.getWorld().update(delta));
-			//ScreenManager.ChangeState("end");
+		if(Game.getWorld().update(delta))
+			ScreenManager.ChangeState("end");
         spawner.update(delta);
         Game.getMattis().handleInput(Game.input, Game.getWorld());
+        
+        if(Game.input.isKeyPressed(Keyboard.KEY_ESCAPE))
+        {
+        		ScreenTitle.active = !ScreenTitle.active;
+        		ScreenManager.ChangeState("pause");
+        }
 	}
 
 	@Override
@@ -25,6 +33,8 @@ public class ScreenGame implements IGameObject
 		g.scale(2, 2);
 		Game.drawWorld(g);
 		g.scale(1/2f, 1/2f);
+		g.setFont(Game.FONT_MENU);
+        g.drawString("SCORE: " + Game.getScore(), 10, 10);
 	}
 
 	@Override

@@ -312,6 +312,15 @@ public class World {
         }
     }
 
+    public void clearEntities()
+    {
+        enemies = new ArrayList<Hurtable>();
+        projectiles = new ArrayList<Projectile>();
+        explosions = new ArrayList<Explosion>();
+        pickups = new ArrayList<Pickup>();
+        graphics = new ArrayList<Graphic>();
+    }
+    
     private void explode(Hurtable enemy, int size, int score) {
         int explosionDelay = enemy.getExplosionDelay();
         explosions.add(new Explosion(enemy.getX(), enemy.getY(), size, score, explosionDelay, 0));
