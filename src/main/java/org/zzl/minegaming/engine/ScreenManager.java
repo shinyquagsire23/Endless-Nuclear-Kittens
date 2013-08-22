@@ -1,4 +1,4 @@
-package org.minegaming.zzl.engine;
+package org.zzl.minegaming.engine;
 
 import java.util.*;
 

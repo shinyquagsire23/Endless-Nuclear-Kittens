@@ -1,18 +1,15 @@
-package com.mojang.mojam.giraffe;
+package org.zzl.minegaming.screens;
 
-import org.minegaming.zzl.engine.IGameObject;
-import org.minegaming.zzl.engine.ScreenManager;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
+import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.ScreenManager;
+
+import com.mojang.mojam.giraffe.Game;
 
 public class ScreenEnd implements IGameObject
 {
-
-	private static String randomWord;
-	private static int year;
-	private static boolean active = true;
-
 	@Override
 	public void Update(int delta)
 	{

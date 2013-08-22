@@ -3,12 +3,16 @@ package com.mojang.mojam.giraffe;
 import com.mojang.mojam.giraffe.entity.Mattis;
 
 import org.lwjgl.opengl.Display;
-import org.minegaming.zzl.engine.IGameObject;
-import org.minegaming.zzl.engine.ScreenManager;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
+import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.ScreenManager;
+import org.zzl.minegaming.screens.ScreenEnd;
+import org.zzl.minegaming.screens.ScreenGame;
+import org.zzl.minegaming.screens.ScreenPaused;
+import org.zzl.minegaming.screens.ScreenTitle;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +37,8 @@ public class Game extends BasicGame {
     public static final int SOUND_CHAIN_EXPLOSION = 6;
     public static final int SOUND_BULLET_HIT = 7;
     public static final int SOUND_PICKUP = 8;
-    private static Sound[] sounds = new Sound[9];
+    public static final int BUTTON_HOVER = 9;
+    private static Sound[] sounds = new Sound[10];
     
     private static Image starfield;
     private static Image[] stars = new Image[3];
@@ -104,6 +109,7 @@ public class Game extends BasicGame {
         sounds[SOUND_CHAIN_EXPLOSION] = new Sound("chain_explosion.wav");
         sounds[SOUND_BULLET_HIT] = new Sound("bullet_hit.wav");
         sounds[SOUND_PICKUP] = new Sound("item_pickup.wav");
+        sounds[BUTTON_HOVER] = new Sound("button_hover.wav");
         
         for(IGameObject g : ScreenManager.getScreens())
         	g.init();
@@ -134,12 +140,15 @@ public class Game extends BasicGame {
     public void update(GameContainer gc, int delta) throws SlickException {
     	ScreenManager.Update(delta);
         if (!gc.hasFocus() || delta > 1000) {
+        	gc.setMouseGrabbed(false);
             return; //If the game isn't focus or the last frame took longer than 1 second to render, skip this one
         }
 
         if (input.isKeyPressed(Input.KEY_END)) {
             System.exit(0);
         }
+        if(input.isKeyPressed(Input.KEY_F3))
+        	gc.setMouseGrabbed(!gc.isMouseGrabbed());
     }
 
     public static void reset()
@@ -175,6 +184,11 @@ public class Game extends BasicGame {
             }
         }
         world.draw(g);
+    }
+    
+    public static void drawGrid(Graphics g)
+    {
+    	world.drawGrid(g, true);
     }
     
     public static BigInteger getScore()

@@ -1,16 +1,16 @@
-package com.mojang.mojam.giraffe;
+package org.zzl.minegaming.screens;
 
 import org.lwjgl.input.Keyboard;
-import org.minegaming.zzl.engine.IGameObject;
-import org.minegaming.zzl.engine.ScreenManager;
-import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
-import org.newdawn.slick.Input;
+import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.ScreenManager;
+
+import com.mojang.mojam.giraffe.Game;
+import com.mojang.mojam.giraffe.Spawner;
 
 public class ScreenGame implements IGameObject
 {
     private static Spawner spawner;
-    private boolean active = true;
     
 	@Override
 	public void Update(int delta)

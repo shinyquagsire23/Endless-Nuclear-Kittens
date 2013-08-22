@@ -227,7 +227,41 @@ public class World {
     }
 
     public void draw(Graphics g) {
-        float tx = Math.round(cam.x + shake.x);
+    	float tx = Math.round(cam.x + shake.x);
+        float ty = Math.round(cam.y + shake.y);
+    	drawGrid(g,false);
+        for (Hurtable hurtable : enemies) {
+            hurtable.drawShadow(g);
+        }
+        mattis.drawShadow(g);
+        for (Pickup pickup : pickups) {
+            pickup.draw(g);
+        }
+        g.setDrawMode(Graphics.MODE_ADD);
+        for (Explosion explosion : explosions) {
+            explosion.draw(g);
+        }
+        g.setDrawMode(Graphics.MODE_NORMAL);
+        for (Graphic graphic : graphics) {
+            graphic.draw(g);
+        }
+        for (Projectile projectile : projectiles) {
+            projectile.draw(g);
+        }
+        for (Hurtable hurtable : enemies) {
+            hurtable.draw(g);
+        }
+        mattis.draw(g);
+        g.translate(tx, ty);
+        for (Graphic graphic : graphics) {
+            graphic.drawGUI(g);
+        }
+        mattis.drawGUI(g);
+    }
+    
+    public void drawGrid(Graphics g, boolean gridonly)
+    {
+    	float tx = Math.round(cam.x + shake.x);
         float ty = Math.round(cam.y + shake.y);
 
         g.translate(-tx, -ty);
@@ -260,33 +294,8 @@ public class World {
             }
         }
         g.setDrawMode(Graphics.MODE_NORMAL);
-        for (Hurtable hurtable : enemies) {
-            hurtable.drawShadow(g);
-        }
-        mattis.drawShadow(g);
-        for (Pickup pickup : pickups) {
-            pickup.draw(g);
-        }
-        g.setDrawMode(Graphics.MODE_ADD);
-        for (Explosion explosion : explosions) {
-            explosion.draw(g);
-        }
-        g.setDrawMode(Graphics.MODE_NORMAL);
-        for (Graphic graphic : graphics) {
-            graphic.draw(g);
-        }
-        for (Projectile projectile : projectiles) {
-            projectile.draw(g);
-        }
-        for (Hurtable hurtable : enemies) {
-            hurtable.draw(g);
-        }
-        mattis.draw(g);
-        g.translate(tx, ty);
-        for (Graphic graphic : graphics) {
-            graphic.drawGUI(g);
-        }
-        mattis.drawGUI(g);
+        if(gridonly)
+        	g.translate(tx, ty);
     }
 
     public void addEntity(List<? extends Entity> list) {
