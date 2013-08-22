@@ -95,6 +95,7 @@ public class RandomWalker extends AbstractEnemy {
 
     @Override
     public void onDeath() {
+    	Game.INSTANCE.getWorld().addFrag();
         Game.INSTANCE.getWorld().addEntity(new KittenPoof(x, y, dx, dy));
     }
 }

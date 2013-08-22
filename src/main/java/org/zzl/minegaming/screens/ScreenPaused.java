@@ -14,7 +14,7 @@ import com.mojang.mojam.giraffe.Game;
 public class ScreenPaused implements IGameObject
 {
 
-	Button resume = new Button(Game.SCREENSIZE.x / 2,600f, 540, 64, "Resume Game", new ButtonAction() {
+	Button resume = new Button(Game.SCREENSIZE.x / 2,520f, 540, 64, "Resume Game", new ButtonAction() {
 		
 		public void hover()
 		{
@@ -29,7 +29,7 @@ public class ScreenPaused implements IGameObject
 		public void unhover() {}
 	});
 
-	Button backToTitle = new Button(Game.SCREENSIZE.x / 2,700f, 540, 64, "Back to Title Screen", new ButtonAction() {
+	Button backToTitle = new Button(Game.SCREENSIZE.x / 2,600f, 540, 64, "Back to Title Screen", new ButtonAction() {
 		
 		public void hover()
 		{
@@ -46,7 +46,7 @@ public class ScreenPaused implements IGameObject
 		public void unhover() {}
 	});
 	
-	Button quitGame = new Button(Game.SCREENSIZE.x / 2,800f, "Quit Game", new ButtonAction() {
+	Button quitGame = new Button(Game.SCREENSIZE.x / 2,680f, "Quit Game", new ButtonAction() {
 		
 		public void hover()
 		{
@@ -92,12 +92,12 @@ public class ScreenPaused implements IGameObject
 		g.setColor(new Color(0.0f, 0.1f, 0.2f, 0.6f));
 		g.fillRect(0, 0, Game.SCREENSIZE.x, Game.SCREENSIZE.y);
 		g.scale(2f, 2f);
-		g.drawImage(ScreenTitle.title, Game.SCREENSIZE.x / 4 - ScreenTitle.title.getWidth() / 2, -10 + (Game.hasStarted ? -20 : 0));
+		g.drawImage(ScreenTitle.title, Game.SCREENSIZE.x / 4 - ScreenTitle.title.getWidth() / 2, -50);
 		g.scale(1 / 2f, 1 / 2f);
 		g.setColor(Color.white);
 		g.setFont(Game.FONT_MENU);
-		Game.drawStringCentered(g, "-- paused --", Game.SCREENSIZE.x / 2, 500);
-		Game.drawStringCentered(g, "(the kittens are waiting)", Game.SCREENSIZE.x / 2, 530);
+		Game.drawStringCentered(g, "-- paused --", Game.SCREENSIZE.x / 2, 440);
+		Game.drawStringCentered(g, "(the kittens are waiting)", Game.SCREENSIZE.x / 2, 470);
 		backToTitle.Draw(g);
 		quitGame.Draw(g);
 		resume.Draw(g);

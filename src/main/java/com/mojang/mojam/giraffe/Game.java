@@ -11,6 +11,7 @@ import org.zzl.minegaming.engine.IGameObject;
 import org.zzl.minegaming.engine.ScreenManager;
 import org.zzl.minegaming.screens.ScreenEnd;
 import org.zzl.minegaming.screens.ScreenGame;
+import org.zzl.minegaming.screens.ScreenOptions;
 import org.zzl.minegaming.screens.ScreenPaused;
 import org.zzl.minegaming.screens.ScreenTitle;
 
@@ -188,12 +189,35 @@ public class Game extends BasicGame {
     
     public static void drawGrid(Graphics g)
     {
+    	g.setFont(Game.FONT);
+        for (int x = 0; x < 4; x++) {
+            for (int y = 0; y < 3; y++) {
+                g.drawImage(starfield, x * 256, y * 256);
+            }
+        }
+        for (int x = -2; x < 8; x++) {
+            for (int y = -2; y < 7; y++) {
+                float offsetX = -world.getCameraPosition().x / 20.0f;
+                float offsetY = -world.getCameraPosition().y / 20.0f;
+                g.drawImage(stars[(11 * (19 * Math.abs(x) + 17 * Math.abs(y))) % 3], x * 256 + offsetX, y * 256 + offsetY);
+            }
+        }
     	world.drawGrid(g, true);
     }
     
     public static BigInteger getScore()
     {
     	return world.getScore();
+    }
+    
+    public static BigInteger getFrags()
+    {
+    	return world.getFrags();
+    }
+    
+    public static BigInteger getBossFrags()
+    {
+    	return world.getBossFrags();
     }
     
     public static void drawStringCentered(Graphics g, String string, float x, float y) {
@@ -227,6 +251,7 @@ public class Game extends BasicGame {
         ScreenManager.AddScreen("game", new ScreenGame());
         ScreenManager.AddScreen("pause", new ScreenPaused());
         ScreenManager.AddScreen("end", new ScreenEnd());
+        ScreenManager.AddScreen("options", new ScreenOptions());
         ScreenManager.ChangeState("title");
         app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
         app.start();

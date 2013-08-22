@@ -156,6 +156,7 @@ public class Charger extends AbstractEnemy {
 
     @Override
     public void onDeath() {
+    	Game.INSTANCE.getWorld().addFrag();
         Game.INSTANCE.getWorld().addEntity(new KittenPoof(x, y, (float) Math.cos(angle), (float) Math.sin(angle)));
     }
 }

@@ -1,10 +1,12 @@
 package com.mojang.mojam.giraffe.entity.enemy;
 
+import com.mojang.mojam.giraffe.Game;
 import com.mojang.mojam.giraffe.Util;
 import com.mojang.mojam.giraffe.animator.Direction;
 import com.mojang.mojam.giraffe.animator.DirectionalAnimator;
 import com.mojang.mojam.giraffe.animator.DirectionalType;
 import com.mojang.mojam.giraffe.entity.Mattis;
+
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -89,5 +91,10 @@ public class Boss extends AbstractEnemy {
     @Override
     public int getDamageOnCollision() {
         return 40 + (int) (Math.random() * 21);
+    }
+
+    public void onDeath()
+    {
+    	Game.INSTANCE.getWorld().addBossFrag();
     }
 }

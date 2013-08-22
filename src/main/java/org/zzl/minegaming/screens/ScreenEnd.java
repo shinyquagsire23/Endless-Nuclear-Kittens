@@ -43,6 +43,10 @@ public class ScreenEnd implements IGameObject
         float jump = 30;
         Game.drawStringCentered(g, "OH NO! TOO MANY KITTENS!", Game.SCREENSIZE.x / 2, y);
         y += jump;
+        Game.drawStringCentered(g, "You killed " + Game.getFrags() + " kittens", Game.SCREENSIZE.x / 2, y);
+        y += jump;
+        Game.drawStringCentered(g, "and " + Game.getBossFrags() + " kitten bots", Game.SCREENSIZE.x / 2, y);
+        y += jump * 1.8f;
         Game.drawStringCentered(g, "SCORE: " + Game.getScore(), Game.SCREENSIZE.x / 2, y);
         y += jump * 1.8f;
         Game.drawStringCentered(g, "[click to return to title]", Game.SCREENSIZE.x / 2, y);

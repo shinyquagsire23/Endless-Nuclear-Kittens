@@ -62,6 +62,16 @@ public class Button implements IGameObject
 		return height;
 	}
 	
+	public float getX()
+	{
+		return x;
+	}
+	
+	public float getY()
+	{
+		return y;
+	}
+	
 	public void Draw(Graphics g)
 	{
 		g.setColor(new Color(1.0f, 1.0f, 1.0f, 0.6f));
@@ -80,7 +90,7 @@ public class Button implements IGameObject
 	{
 		if(Game.input.getAbsoluteMouseX() >= this.x - (width - width / 4) && Game.input.getAbsoluteMouseX() < this.x + width - 16)
 		{
-			if(Game.input.getAbsoluteMouseY() >= this.y - 16 && Game.input.getAbsoluteMouseY() < this.y + 64 + 16)
+			if(Game.input.getAbsoluteMouseY() >= this.y - 8 && Game.input.getAbsoluteMouseY() < this.y + 64 + 8)
 			{
 				if(hover == false)
 					action.hover();

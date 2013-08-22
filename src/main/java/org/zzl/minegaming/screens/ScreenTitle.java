@@ -34,6 +34,8 @@ public class ScreenTitle implements IGameObject
 	private static boolean begin = false;
 	private static boolean widescreen = false;
 	private static boolean showMenu = false;
+	private static boolean shoveOff = false;
+	private String nextMenu = "game";
 	
 	private List<Button> buttons = new ArrayList<Button>();
 
@@ -62,13 +64,28 @@ public class ScreenTitle implements IGameObject
 			public void click()
 			{
 				Game.playSound(Game.SOUND_PICKUP);
-				startGame();
+				shoveOff = true;
+				nextMenu = "game";
 			}
 			
 			public void unhover(){}
 		}));
 		y += jump;
-		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Multiplayer", new ButtonActionNull()));
+		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Multiplayer", new ButtonAction() {
+			public void hover()
+			{
+				Game.playSound(Game.BUTTON_HOVER);
+			}
+			
+			public void click()
+			{
+				Game.playSound(Game.SOUND_PICKUP);
+				shoveOff = true;
+				nextMenu = "options";
+			}
+			
+			public void unhover(){}
+		}));
 		y += jump;
 		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Options", new ButtonActionNull()));
 		y += jump;
@@ -106,9 +123,9 @@ public class ScreenTitle implements IGameObject
 		
 		if(begin)
 		{
-			if(tX > titleMin)
+			if(tX > titleMin || shoveOff)
 				tX -= scrollSpeed;
-			if(x > wordsMin)
+			if(x > wordsMin || shoveOff)
 				x -= scrollSpeed * 2;
 			if(tX <= 0 && x <= 512)
 			{
@@ -119,10 +136,16 @@ public class ScreenTitle implements IGameObject
 				mx = Game.SCREENSIZE.x + 512;
 			}
 			
-			if(showMenu && mx >  Game.SCREENSIZE.x + 64 - Game.SCREENSIZE.x / 4)
+			if((showMenu && mx >  Game.SCREENSIZE.x + 64 - Game.SCREENSIZE.x / 4) || shoveOff)
 			{
 				mx -= scrollSpeed * 4;
 			}
+		}
+		
+		if(shoveOff && x <= -800)
+		{
+			ScreenManager.ChangeState(nextMenu);
+			Game.reset();
 		}
 		
 		for(Button b : buttons)
@@ -134,9 +157,6 @@ public class ScreenTitle implements IGameObject
 	
 	private void startGame()
 	{
-		Game.reset();
-		Game.gameRunning = true;
-		Game.hasStarted = true;
 		ScreenManager.ChangeState("game");
 	}
 
@@ -168,6 +188,7 @@ public class ScreenTitle implements IGameObject
 		catch(Exception e){}
 		scrollSpeed = 16;
 		showMenu = false;
+		shoveOff = false;
 	}
 
 	@Override
@@ -190,14 +211,17 @@ public class ScreenTitle implements IGameObject
 
 			float y = 580;
 			float jump = 30;
-			Game.drawStringCentered(g, "In the year " + year + ", kittens are", x, y);
-			y += jump;
-			Game.drawStringCentered(g, randomWord + ".", x, y);
-			y += jump * 1.8f;
-			Game.drawStringCentered(g, "Therefore, they must die.", x, y);
-			y += jump;
-			Game.drawStringCentered(g, (showMenu ? "[click a button]" : "[click to begin]"), x, y);
-			y += jump;
+			if((x > -256 && !widescreen) || widescreen)
+			{
+				Game.drawStringCentered(g, "In the year " + year + ", kittens are", x, y);
+				y += jump;
+				Game.drawStringCentered(g, randomWord + ".", x, y);
+				y += jump * 1.8f;
+				Game.drawStringCentered(g, "Therefore, they must die.", x, y);
+				y += jump;
+				Game.drawStringCentered(g, (showMenu ? "[click a button]" : "[click to begin]"), x, y);
+				y += jump;
+			}
 			
 			for(Button b : buttons)
 				b.Draw(g);

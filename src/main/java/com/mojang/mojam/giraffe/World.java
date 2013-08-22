@@ -36,6 +36,8 @@ public class World {
     private Vector2f cam = new Vector2f();
 
     private BigInteger score = BigInteger.valueOf(0);
+    private BigInteger frags = BigInteger.valueOf(0);
+    private BigInteger bfrags = BigInteger.valueOf(0);
 
     private int shakeDuration = -1;
     private Vector2f shake = new Vector2f(0, 0);
@@ -81,7 +83,27 @@ public class World {
     public BigInteger getScore() {
         return score;
     }
+    
+    public BigInteger getFrags()
+    {
+    	return frags;
+    }
 
+    public void addFrag()
+    {
+    	frags = frags.add(BigInteger.valueOf(1));
+    }
+    
+    public BigInteger getBossFrags()
+    {
+    	return bfrags;
+    }
+
+    public void addBossFrag()
+    {
+    	bfrags = bfrags.add(BigInteger.valueOf(1));
+    }
+    
     public Rectangle getBounds() {
         return bounds;
     }
@@ -208,6 +230,8 @@ public class World {
             if (Math.random() < DROP_SPAWN_CHANCE) {
                 pickups.add(pickupSpawner.spawnPickup(deadEnemy.getX(), deadEnemy.getY()));
             }
+            if(deadEnemy instanceof Boss)
+            	addBossFrag();
         }
 
         for (Graphic graphic : graphics) {
