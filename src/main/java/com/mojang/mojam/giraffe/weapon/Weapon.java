@@ -11,7 +11,7 @@ public interface Weapon {
 
     boolean hasAmmo();
 
-    List<? extends CollidingEntity> shoot();
+    List<? extends CollidingEntity> shoot(int player);
 
     SpriteSheet getPickupSheet();
 

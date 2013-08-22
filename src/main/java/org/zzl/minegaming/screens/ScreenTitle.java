@@ -4,6 +4,7 @@ package org.zzl.minegaming.screens;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.lwjgl.input.Controllers;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -12,6 +13,7 @@ import org.zzl.minegaming.engine.Button;
 import org.zzl.minegaming.engine.ButtonAction;
 import org.zzl.minegaming.engine.ButtonActionNull;
 import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.MultiControls;
 import org.zzl.minegaming.engine.ScreenManager;
 
 import com.mojang.mojam.giraffe.Game;
@@ -31,6 +33,7 @@ public class ScreenTitle implements IGameObject
 	private int titleMin = -512;
 	private int wordsMin = -256;
 	private static int scrollSpeed = 16;
+	private int rumbleTimer = 500;
 	private static boolean begin = false;
 	private static boolean widescreen = false;
 	private static boolean showMenu = false;
@@ -59,10 +62,14 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
+				Controllers.getController(0).setRumblerStrength(0, 50f);
+				rumbleTimer = 100;
 			}
 			
 			public void click()
 			{
+				if(shoveOff)
+					return;
 				Game.playSound(Game.SOUND_PICKUP);
 				shoveOff = true;
 				nextMenu = "game";
@@ -75,10 +82,34 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
+				Controllers.getController(0).setRumblerStrength(0, 50f);
+				rumbleTimer = 100;
 			}
 			
 			public void click()
 			{
+				if(shoveOff)
+					return;
+				Game.playSound(Game.SOUND_PICKUP);
+				shoveOff = true;
+				nextMenu = "multiplayergame";
+			}
+			
+			public void unhover(){}
+		}));
+		y += jump;
+		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Options", new ButtonAction() {
+			public void hover()
+			{
+				Game.playSound(Game.BUTTON_HOVER);
+				Controllers.getController(0).setRumblerStrength(0, 50f);
+				rumbleTimer = 100;
+			}
+			
+			public void click()
+			{
+				if(shoveOff)
+					return;
 				Game.playSound(Game.SOUND_PICKUP);
 				shoveOff = true;
 				nextMenu = "options";
@@ -87,12 +118,12 @@ public class ScreenTitle implements IGameObject
 			public void unhover(){}
 		}));
 		y += jump;
-		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Options", new ButtonActionNull()));
-		y += jump;
 		buttons.add(new Button((widescreen ? mx : x + Game.SCREENSIZE.x - Game.SCREENSIZE.x / 4),y,"Exit", new ButtonAction(){
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
+				Controllers.getController(0).setRumblerStrength(0, 50f);
+				rumbleTimer = 100;
 			}
 			
 			public void click()
@@ -109,7 +140,7 @@ public class ScreenTitle implements IGameObject
 	@Override
 	public void Update(int delta)
 	{
-		if (Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) 
+		if (MultiControls.isLeftMouseMenu()) 
 		{
 			for(Button b : buttons)
 			{
@@ -120,6 +151,12 @@ public class ScreenTitle implements IGameObject
         if (Game.input.isKeyPressed(Input.KEY_ESCAPE)) {
             System.exit(0);
         }
+        
+		rumbleTimer -= delta;
+		if(rumbleTimer <= 0)
+		{
+			Controllers.getController(0).setRumblerStrength(0, 0.0f);
+		}
 		
 		if(begin)
 		{

@@ -13,7 +13,7 @@ public class Nuke extends AbstractWeapon {
     private static final int LESS_THAN_NINE_THOUSAND = 1001;
 
     private static final int MAX_POWER = 5;
-    public Nuke(Mattis mattis, int power) {
+    public Nuke(Mattis[] mattis, int power) {
         super(mattis, power, "box_nuke.png");
     }
 
@@ -28,10 +28,10 @@ public class Nuke extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         power--;
 
-        return Arrays.asList(new NukeExplosion(mattis.getX(), mattis.getY(), LESS_THAN_NINE_THOUSAND, 2));
+        return Arrays.asList(new NukeExplosion(mattis[player].getX(), mattis[player].getY(), LESS_THAN_NINE_THOUSAND, 2));
     }
 
     @Override

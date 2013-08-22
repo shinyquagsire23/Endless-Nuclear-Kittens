@@ -8,6 +8,8 @@ import com.mojang.mojam.giraffe.animator.Direction;
 import com.mojang.mojam.giraffe.animator.DirectionalAnimator;
 import com.mojang.mojam.giraffe.animator.DirectionalType;
 import com.mojang.mojam.giraffe.weapon.*;
+
+import org.lwjgl.input.Controllers;
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Font;
 import org.newdawn.slick.Graphics;
@@ -15,6 +17,8 @@ import org.newdawn.slick.Input;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
+import org.zzl.minegaming.engine.MultiControls;
+import org.zzl.minegaming.engine.XBOXButtons;
 
 import java.util.HashMap;
 import java.util.List;
@@ -45,13 +49,16 @@ public class Mattis extends BaseEntity implements Hurtable {
     private boolean flash;
     private int flashDuration;
     private int muzzleAnimDuration = -1;
+    private int player = 0;
+    private boolean isDead = false;
 
     private int timeSinceBlink = INVINCIBILITY_TIME_AFTER_BLINK;
     private DirectionalAnimator currentMuzzleAnimator;
 
-    public Mattis(float x, float y, Vector2f screensize) {
+    public Mattis(float x, float y, Vector2f screensize, int player) {
         super(x, y, new Circle(x, y, 10));
         this.screensize = screensize;
+        this.player = player;
 
         muzzleAnimator = new DirectionalAnimator(DirectionalType.EIGHT, true);
         muzzleAnimator.load("muzzleflash_48.png", 48, 48);
@@ -73,7 +80,7 @@ public class Mattis extends BaseEntity implements Hurtable {
 
         int duration = 40;
         idleAnimator = new DirectionalAnimator(DirectionalType.EIGHT, true);
-        idleAnimator.load("mattis.png", 48, 48);
+        idleAnimator.load("mattis" + (player > 0 ? player + 1 : "") + ".png", 48, 48);
         idleAnimator.setAnimation(Direction.SOUTH, 0, 0, 1, duration);
         idleAnimator.setAnimation(Direction.SOUTH_EAST, 0, 3, 1, duration);
         idleAnimator.setAnimation(Direction.EAST, 0, 6, 1, duration);
@@ -82,7 +89,7 @@ public class Mattis extends BaseEntity implements Hurtable {
         idleAnimator.autoFill();
 
         shootingAnimator = new DirectionalAnimator(DirectionalType.EIGHT, true);
-        shootingAnimator.load("mattis.png", 48, 48);
+        shootingAnimator.load("mattis" + (player > 0 ? player + 1 : "") + ".png", 48, 48);
 
         shootingAnimator.setAnimation(Direction.SOUTH, 0, 1, 1, duration);
         shootingAnimator.setAnimation(Direction.SOUTH_EAST, 0, 4, 1, duration);
@@ -93,7 +100,7 @@ public class Mattis extends BaseEntity implements Hurtable {
 
 
         walkingAnimator = new DirectionalAnimator(DirectionalType.EIGHT, true);
-        walkingAnimator.load("mattis.png", 48, 48);
+        walkingAnimator.load("mattis" + (player > 0 ? player + 1 : "") + ".png", 48, 48);
 
         walkingAnimator.setAnimation(Direction.SOUTH, 0, 2, 8, duration);
         walkingAnimator.setAnimation(Direction.SOUTH_EAST, 0, 5, 8, duration);
@@ -106,7 +113,7 @@ public class Mattis extends BaseEntity implements Hurtable {
         currentMuzzleAnimator = muzzleAnimator;
 
         //setWeapon(new Blink(this, 5));
-        setWeapon(new Blaster(this, 1));
+        //setWeapon(new Blaster(this, 1));
     }
 
     @Override
@@ -139,6 +146,16 @@ public class Mattis extends BaseEntity implements Hurtable {
     @Override
     public boolean isFinished() {
         return false;
+    }
+    
+    public boolean isDead()
+    {
+    	return isDead;
+    }
+    
+    public void kill()
+    {
+    	isDead = true;
     }
 
     public void setRotation(float rotation) {
@@ -195,6 +212,8 @@ public class Mattis extends BaseEntity implements Hurtable {
 
     public void drawGUI(Graphics g) {
         g.setLineWidth(2);
+        g.pushTransform();
+        g.translate(0, -64*player);
 
         WeaponSlot[] weaponSlots = WeaponSlot.values();
         for (int count = 0; count < weaponSlots.length; count++) {
@@ -220,7 +239,7 @@ public class Mattis extends BaseEntity implements Hurtable {
                 g.fillRect(margin + textWidth, actualScreenSize - margin - rowHeight * barLocation, barWidth, barHeight);
 
                 // Edge
-                g.setColor(Color.white);
+                g.setColor(Game.playerColors[player]);
                 g.drawRect(margin + textWidth, actualScreenSize - margin - rowHeight * barLocation, barWidth, barHeight);
 
                 // Bar
@@ -234,11 +253,16 @@ public class Mattis extends BaseEntity implements Hurtable {
                 float offY = actualScreenSize - margin - rowHeight * barLocation;
                 g.translate(offX, offY);
                 g.scale(1 / 2f, 1 / 2f);
-                if (weapon == null) {
-                    if (slot == WeaponSlot.SECONDARY) {
+                g.setFont(Game.FONT);
+                if (weapon == null) 
+                {
+                    if (slot == WeaponSlot.SECONDARY) 
+                    {
                         g.drawString("NO " + slot.toString().toUpperCase() + "", 0, 0);
                     }
-                } else {
+                } 
+                else 
+                {
                     g.drawString(weapon.toString(), 0, 0);
                 }
                 g.scale(2f, 2f);
@@ -252,7 +276,9 @@ public class Mattis extends BaseEntity implements Hurtable {
         String hpString = health + "%";
         g.drawString(hpString, screensize.x - 16 - hpFont.getWidth(hpString), screensize.y - 48);
         g.scale(2f, 2f);
+        g.popTransform();
         g.setLineWidth(1);
+
     }
 
     public void setWeapon(Weapon weapon) {
@@ -276,7 +302,7 @@ public class Mattis extends BaseEntity implements Hurtable {
                     }
 
                     lastShot.put(slot, time);
-                    List<? extends CollidingEntity> entities = weapon.shoot();
+                    List<? extends CollidingEntity> entities = weapon.shoot(player);
 
                     if (weapon instanceof Blink) {
                         timeSinceBlink = 0;
@@ -293,43 +319,47 @@ public class Mattis extends BaseEntity implements Hurtable {
     }
 
     public void handleInput(Input input, World world) {
+    	if(isDead)
+    		return;
         float speed = 1 / 4.0f;
 
         float dy = 0f;
-        if (input.isKeyDown(Input.KEY_W) || input.isKeyDown(Input.KEY_UP)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyDown(Input.KEY_W) : MultiControls.getAxisValue(player, XBOXButtons.AX_LEFT_STICK_Y) < 0)) {
             dy -= speed;
         }
-        if (input.isKeyDown(Input.KEY_S) || input.isKeyDown(Input.KEY_DOWN)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyDown(Input.KEY_S) : MultiControls.getAxisValue(player, XBOXButtons.AX_LEFT_STICK_Y) > 0)) {
             dy += speed;
         }
         this.dy = dy;
 
         float dx = 0f;
-        if (input.isKeyDown(Input.KEY_A) || input.isKeyDown(Input.KEY_LEFT)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyDown(Input.KEY_A) : MultiControls.getAxisValue(player, XBOXButtons.AX_LEFT_STICK_X) < 0)) {
             dx -= speed;
         }
-        if (input.isKeyDown(Input.KEY_D) || input.isKeyDown(Input.KEY_RIGHT)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyDown(Input.KEY_D) : MultiControls.getAxisValue(player, XBOXButtons.AX_LEFT_STICK_X) > 0)) {
             dx += speed;
         }
         this.dx = dx;
 
         final Vector2f cam = world.getCameraPosition();
-        float offsetX = (this.x - cam.x) - input.getAbsoluteMouseX() / 2f;
-        float offsetY = (this.y - cam.y) - input.getAbsoluteMouseY() / 2f;
+        //float offsetX = (this.x - cam.x) - input.getAbsoluteMouseX() / 2f;
+        //float offsetY = (this.y - cam.y) - input.getAbsoluteMouseY() / 2f;
+        float offsetX = (this.x - cam.x) - Game.cursorPos[player].x / 2f;
+        float offsetY = (this.y - cam.y) - Game.cursorPos[player].y / 2f;
         setRotation((float) Math.toDegrees(Math.atan2(offsetY, offsetX)));
 
         isShooting = false;
-        if (input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isMouseButtonDown(Input.MOUSE_LEFT_BUTTON) : MultiControls.getController(player).getAxisValue(XBOXButtons.AX_RIGHT_TRIGGER) > -1)) {
             List<? extends CollidingEntity> entities = shoot(WeaponSlot.PRIMARY);
             world.addEntity(entities);
             isShooting = entities == null || !entities.isEmpty();
         }
-        if (input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isMouseButtonDown(Input.MOUSE_RIGHT_BUTTON) : MultiControls.getController(player).getAxisValue(XBOXButtons.AX_LEFT_TRIGGER) > -1)) {
             List<? extends CollidingEntity> entities = shoot(WeaponSlot.SECONDARY);
             world.addEntity(entities);
             isShooting = entities == null || !entities.isEmpty();
         }
-        if (input.isKeyPressed(Input.KEY_SPACE)) {
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyPressed(Input.KEY_SPACE) : MultiControls.getController(player).isButtonPressed(XBOXButtons.BTN_RIGHT_THUMB))) {
             List<? extends CollidingEntity> entities = shoot(WeaponSlot.PANIC);
             world.addEntity(entities);
             isShooting = entities == null || !entities.isEmpty();
@@ -340,6 +370,11 @@ public class Mattis extends BaseEntity implements Hurtable {
         return rotation;
     }
 
+    public int getPlayerNum()
+    {
+    	return player;
+    }
+    
     private final float[] gunOffsetX = new float[]{-17, -18, 4.5f, 16, 16, 9, -4.5f, -10};
     private final float[] gunOffsetY = new float[]{7, -3, -10, -2, 7, 11, 12, 11};
 

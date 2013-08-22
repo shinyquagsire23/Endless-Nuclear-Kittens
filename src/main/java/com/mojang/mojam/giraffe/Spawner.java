@@ -5,6 +5,7 @@ import com.mojang.mojam.giraffe.entity.enemy.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -28,11 +29,11 @@ public class Spawner {
     private int bossCount = 0;
 
     private final World world;
-    private final Mattis mattis;
+    private final Mattis[] mattis;
 
     private List<AbstractEnemy> enemyTypes = new ArrayList<AbstractEnemy>();
 
-    public Spawner(World world, Mattis mattis) {
+    public Spawner(World world, Mattis[] mattis) {
         this.world = world;
         this.mattis = mattis;
 
@@ -65,7 +66,8 @@ public class Spawner {
         while (timeSinceRegular > REGULAR_SPAWN_INTERVAL) {
             for (AbstractEnemy e : enemyTypes) {
                 if (Math.random() < e.getSpawnChance(totalTime) * generalSpawnFactor) {
-                    Vector2f spawnPosition = getSpawnPosition(world.getSpawnBounds(), mattis);
+                    Random r = new Random();
+                    Vector2f spawnPosition = getSpawnPosition(world.getSpawnBounds(), mattis[r.nextInt(Game.numPlayers)]);
                     world.addEntity(e.copy().setPosition(spawnPosition));
                 }
             }
@@ -132,7 +134,8 @@ public class Spawner {
         float angle = 0;
         for (int i = 0; i < numPositions; i++) {
             Vector2f desiredPos = new Vector2f(center.x + radius * (float) Math.cos(angle), center.y + radius * (float) Math.sin(angle));
-            positions.add(getSpawnPosition(world.getSpawnBounds(), mattis, desiredPos));
+            Random r = new Random();
+            positions.add(getSpawnPosition(world.getSpawnBounds(), mattis[r.nextInt(Game.numPlayers)], desiredPos));
             angle += Math.PI * 2 / numPositions;
         }
         return positions;

@@ -7,7 +7,9 @@ import org.newdawn.slick.Input;
 import org.zzl.minegaming.engine.Button;
 import org.zzl.minegaming.engine.ButtonAction;
 import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.MultiControls;
 import org.zzl.minegaming.engine.ScreenManager;
+import org.zzl.minegaming.engine.XBOXButtons;
 
 import com.mojang.mojam.giraffe.Game;
 
@@ -65,12 +67,12 @@ public class ScreenPaused implements IGameObject
 	@Override
 	public void Update(int delta)
 	{
-		if(Game.input.isKeyPressed(Keyboard.KEY_ESCAPE))
+		if(Game.input.isKeyPressed(Keyboard.KEY_ESCAPE) || MultiControls.isButtonDown(XBOXButtons.BTN_Y))
 		{
 			ScreenTitle.active = !ScreenTitle.active;
 			ScreenManager.ChangeState("game");
 		}
-		if (Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) 
+		if (MultiControls.isLeftMouseMenu()) 
 		{
 			backToTitle.sendClick();
 			quitGame.sendClick();

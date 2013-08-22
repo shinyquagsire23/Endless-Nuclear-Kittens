@@ -6,12 +6,11 @@ import org.newdawn.slick.Input;
 import org.zzl.minegaming.engine.Button;
 import org.zzl.minegaming.engine.ButtonAction;
 import org.zzl.minegaming.engine.IGameObject;
-import org.zzl.minegaming.engine.MultiControls;
 import org.zzl.minegaming.engine.ScreenManager;
 
 import com.mojang.mojam.giraffe.Game;
 
-public class ScreenOptions implements IGameObject
+public class ScreenMultiplayer implements IGameObject
 {
 	Button back = new Button(Game.SCREENSIZE.x, Game.SCREENSIZE.y - 80, 512, 64, "Back to TitleScreen", new ButtonAction() {
 
@@ -36,7 +35,7 @@ public class ScreenOptions implements IGameObject
 	@Override
 	public void Update(int delta)
 	{
-		if (MultiControls.isLeftMouseMenu()) 
+		if (Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) 
 		{
 			back.sendClick();
 		}

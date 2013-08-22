@@ -10,23 +10,24 @@ import org.zzl.minegaming.engine.XBOXButtons;
 import com.mojang.mojam.giraffe.Game;
 import com.mojang.mojam.giraffe.Spawner;
 
-public class ScreenGame implements IGameObject
+public class ScreenMultiplayerGame implements IGameObject
 {
     private static Spawner spawner;
     
 	@Override
 	public void Update(int delta)
 	{
-		if(Game.numPlayers != 1)
+		if(Game.numPlayers == 1 || spawner == null)
 		{
-			Game.numPlayers = 1;
+			Game.numPlayers = MultiControls.numPlayers();
 			Game.reset();
 			reset();
 		}
 		if(Game.getWorld().update(delta))
 			ScreenManager.ChangeState("end");
         spawner.update(delta);
-        Game.getMattis()[0].handleInput(Game.input, Game.getWorld());
+        for(int i = 0; i < Game.numPlayers; i++)
+        	Game.getMattis()[i].handleInput(Game.input, Game.getWorld());
         
         if(Game.input.isKeyPressed(Keyboard.KEY_ESCAPE) || MultiControls.isButtonDown(XBOXButtons.BTN_Y))
         {

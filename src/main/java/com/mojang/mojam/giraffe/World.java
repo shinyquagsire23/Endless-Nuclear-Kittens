@@ -6,6 +6,8 @@ import com.mojang.mojam.giraffe.entity.graphic.Graphic;
 import com.mojang.mojam.giraffe.entity.graphic.PickupGraphic;
 import com.mojang.mojam.giraffe.entity.projectile.OdysseyRocket;
 import com.mojang.mojam.giraffe.entity.projectile.Projectile;
+import com.mojang.mojam.giraffe.weapon.Blaster;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -23,7 +25,7 @@ public class World {
     private static final double DROP_SPAWN_CHANCE = 0.1;
     public static final BigInteger TWO = BigInteger.valueOf(2);
     private final Vector2f screensize;
-    private final Mattis mattis;
+    private final Mattis[] mattis;
     private final Rectangle bounds;
 
     private List<Hurtable> enemies = new ArrayList<Hurtable>();
@@ -59,14 +61,17 @@ public class World {
 
     private int pickupDelay = 0;
 
-    public World(Vector2f screensize, Mattis mattis) {
+    public World(Vector2f screensize, Mattis[] mattis) {
         this.screensize = screensize;
         this.mattis = mattis;
         pickupSpawner = new PickupSpawner(mattis);
+        
+        for(Mattis m : mattis)
+        	m.setWeapon(new Blaster(mattis,1));
 
         bounds = new Rectangle(0, 0, 256 * 4, 256 * 2);
-        cam.x = seekCam.x = -screensize.x / 4.0f + mattis.getX();
-        cam.y = seekCam.y = -screensize.y / 4.0f + mattis.getY();
+        cam.x = seekCam.x = -screensize.x / 4.0f + mattis[0].getX();
+        cam.y = seekCam.y = -screensize.y / 4.0f + mattis[0].getY();
 
         SpriteSheet sheet = Util.loadSpriteSheet("lasergrid_sheet.png", 128, 128);
         lasergrid[SPRITE_C] = sheet.getSprite(0, 0);
@@ -130,8 +135,14 @@ public class World {
 
         pickupDelay *= 0.99f;
 
-        seekCam.x = -screensize.x / 4.0f + mattis.getX();
-        seekCam.y = -screensize.y / 4.0f + mattis.getY();
+        for(Mattis m : mattis)
+        {
+        	if(m.isDead())
+        		continue;
+        	seekCam.x = -screensize.x / 4.0f + m.getX();
+        	seekCam.y = -screensize.y / 4.0f + m.getY();
+        	break;
+        }
         seekCam.x = Math.max(bounds.getX() - 100, Math.min(bounds.getMaxX() - screensize.x / 2f + 100, seekCam.x));
         seekCam.y = Math.max(bounds.getY() - 100, Math.min(bounds.getMaxY() - screensize.y / 2f + 100, seekCam.y));
 
@@ -173,30 +184,47 @@ public class World {
 
         for (Hurtable hurtable : enemies) {
             hurtable.update(delta);
-            if (hurtable.getCollider().intersects(mattis.getCollider())) {
-                boolean dead = mattis.hurt(hurtable, hurtable.getDamageOnCollision(), 0, 0);
-                if (dead) {
-                    return true;
-                }
-                explode(hurtable, 30, 2);
-                deadEnemies.add(hurtable);
+            for(Mattis m : mattis)
+            {
+            	if (hurtable.getCollider().intersects(m.getCollider())) {
+            		boolean dead = m.hurt(hurtable, hurtable.getDamageOnCollision(), 0, 0);
+            		if (dead) {
+            			m.kill();
+            		}
+            		explode(hurtable, 30, 2);
+            		deadEnemies.add(hurtable);
+            	}
             }
         }
+        
+        int numDead = 0;
+        for(int i = 0; i < mattis.length; i++)
+        {
+        	if(mattis[i].isDead())
+        		numDead++;
+        }
+        
+        if(numDead == Game.numPlayers)
+			return true;
 
         for (Pickup pickup : pickups) {
-            pickup.update(delta);
-            if (pickup.getCollider().intersects(mattis.getCollider())) {
-                graphics.add(new PickupGraphic(screensize, pickup.getPickupString(), pickupDelay));
-                pickupDelay += 1000;
-                pickup.onPickup(mattis);
-                deadPickups.add(pickup);
-            }
-            if (pickup.isFinished()) {
-                deadPickups.add(pickup);
-            }
+        	for(Mattis m : mattis)
+        	{
+        		pickup.update(delta);
+        		if (pickup.getCollider().intersects(m.getCollider())) {
+        			graphics.add(new PickupGraphic(screensize, pickup.getPickupString(), pickupDelay));
+        			pickupDelay += 1000;
+        			pickup.onPickup(m);
+        			deadPickups.add(pickup);
+        		}
+        		if (pickup.isFinished()) {
+        			deadPickups.add(pickup);
+        		}
+        	}
         }
 
-        mattis.update(delta);
+        for(Mattis m : mattis)
+        	m.update(delta);
 
         projectile:
         for (Projectile projectile : projectiles) {
@@ -257,7 +285,11 @@ public class World {
         for (Hurtable hurtable : enemies) {
             hurtable.drawShadow(g);
         }
-        mattis.drawShadow(g);
+        for(Mattis m : mattis)
+        {
+        	if(!m.isDead())
+        		m.drawShadow(g);
+        }
         for (Pickup pickup : pickups) {
             pickup.draw(g);
         }
@@ -275,12 +307,18 @@ public class World {
         for (Hurtable hurtable : enemies) {
             hurtable.draw(g);
         }
-        mattis.draw(g);
+        for(Mattis m : mattis)
+        {
+        	if(!m.isDead())
+        		m.draw(g);
+        }
         g.translate(tx, ty);
         for (Graphic graphic : graphics) {
             graphic.drawGUI(g);
         }
-        mattis.drawGUI(g);
+        for(Mattis m : mattis)
+        	if(!m.isDead())
+        			m.drawGUI(g);
     }
     
     public void drawGrid(Graphics g, boolean gridonly)

@@ -2,15 +2,20 @@ package com.mojang.mojam.giraffe;
 
 import com.mojang.mojam.giraffe.entity.Mattis;
 
+import org.lwjgl.LWJGLException;
+import org.lwjgl.input.Controllers;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.*;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
 import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.MultiControls;
 import org.zzl.minegaming.engine.ScreenManager;
+import org.zzl.minegaming.engine.XBOXButtons;
 import org.zzl.minegaming.screens.ScreenEnd;
 import org.zzl.minegaming.screens.ScreenGame;
+import org.zzl.minegaming.screens.ScreenMultiplayerGame;
 import org.zzl.minegaming.screens.ScreenOptions;
 import org.zzl.minegaming.screens.ScreenPaused;
 import org.zzl.minegaming.screens.ScreenTitle;
@@ -44,9 +49,12 @@ public class Game extends BasicGame {
     private static Image starfield;
     private static Image[] stars = new Image[3];
 
-    private static Mattis mattis;
+    private static Mattis[] mattis;
+    public static int numPlayers = 1;
     private static World world;
-
+    
+    public static Color[] playerColors = new Color[] {Color.white,Color.red,Color.blue,Color.green,Color.yellow,Color.orange,Color.cyan,Color.lightGray,Color.magenta,Color.pink,Color.darkGray,Color.black};
+    public static Vector2f[] cursorPos = new Vector2f[12];
 
     public static Input input;
     public static Image cursor;
@@ -64,15 +72,30 @@ public class Game extends BasicGame {
         return world;
     }
     
-    public static Mattis getMattis()
+    public static Mattis[] getMattis()
     {
     	return mattis;
     }
 
     @Override
     public void init(GameContainer gc) throws SlickException {
-        reset();
         input = gc.getInput();
+        input.initControllers();
+    	numPlayers = MultiControls.numPlayers();
+        reset();
+
+        
+        for(int i = 0; i < MultiControls.numPlayers(); i++)
+        {
+        	cursorPos[i] = new Vector2f(0,0);
+        	for(int j = 0; j < 7; j++)
+        	{
+        		MultiControls.getController(i).setDeadZone(j, 0.2f);
+        		MultiControls.getController(i).setDeadZone(j, 0.2f);
+        	}
+        }
+        
+        System.out.println(input.getControllerCount() + " controllers found!");
         gc.setTargetFrameRate(60);
         gc.setMouseGrabbed(true);
         gc.setShowFPS(false);
@@ -150,11 +173,76 @@ public class Game extends BasicGame {
         }
         if(input.isKeyPressed(Input.KEY_F3))
         	gc.setMouseGrabbed(!gc.isMouseGrabbed());
+        if(ScreenManager.currentScreen instanceof ScreenGame || ScreenManager.currentScreen instanceof ScreenMultiplayerGame)
+        {
+        	for(int i = 0; i < numPlayers; i++)
+            {
+        		if(MultiControls.getMode() == MultiControls.P2X_CONTROLLER && i == 0)
+        		{
+        			cursorPos[i].x = input.getAbsoluteMouseX();
+        			cursorPos[i].y = input.getAbsoluteMouseY();
+        			continue;
+        		}
+            	for(int j = 0; j < 7; j++)
+            	{
+            		//MultiControls.getController(i).setDeadZone(j, 0f);
+            		//MultiControls.getController(i).setDeadZone(j, 0f);
+            	}
+            	
+        		if(MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) != 0)
+        			cursorPos[i].x = mattis[i].getX() * 2 - world.getCameraPosition().x * 2 + MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) * SCREENSIZE.x / 4;
+        		else
+        			cursorPos[i].x = mattis[i].getX() * 2 - world.getCameraPosition().x * 2;
+        		
+
+        		if(MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_Y) != 0)
+        			cursorPos[i].y = mattis[i].getY() * 2 - world.getCameraPosition().y * 2 + MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_Y) * SCREENSIZE.x / 4;
+        		else
+        			cursorPos[i].y = mattis[i].getY() * 2 - world.getCameraPosition().y * 2;
+            }
+        }
+        else
+        {
+        	for(int i = 0; i < MultiControls.numPlayers(); i++)
+        	{
+        		if(MultiControls.getMode() == MultiControls.P2X_CONTROLLER && i == 0)
+        		{
+        			cursorPos[i].x = input.getAbsoluteMouseX();
+        			cursorPos[i].y = input.getAbsoluteMouseY();
+        			continue;
+        		}
+        		for(int j = 0; j < 7; j++)
+            	{
+            		MultiControls.getController(i).setDeadZone(j, 0.2f);
+            		MultiControls.getController(i).setDeadZone(j, 0.2f);
+            	}
+        		cursorPos[i].x += MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) * 20;
+        		cursorPos[i].y += MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_Y) * 20;
+        		cursorPos[i].x += MultiControls.getAxisValue(i,XBOXButtons.AX_LEFT_STICK_X) * 20;
+        		cursorPos[i].y += MultiControls.getAxisValue(i,XBOXButtons.AX_LEFT_STICK_Y) * 20;
+
+        		if(cursorPos[i].x > SCREENSIZE.x)
+        			cursorPos[i].x = SCREENSIZE.x;
+
+        		if(cursorPos[i].y > SCREENSIZE.y)
+        			cursorPos[i].y = SCREENSIZE.y;
+
+        		if(cursorPos[i].x < 0)
+        			cursorPos[i].x = 0;
+
+        		if(cursorPos[i].y < 0)
+        			cursorPos[i].y = 0;
+        	}
+        }
     }
 
     public static void reset()
     {
-        mattis = new Mattis(300, 250, SCREENSIZE);
+    	mattis = new Mattis[numPlayers];
+    	for(int i = 0; i < numPlayers; i++)
+    	{
+    		mattis[i] = new Mattis(300, 250, SCREENSIZE,i);
+    	}
         world = new World(SCREENSIZE, mattis);
     	ScreenTitle.reset();
     	ScreenGame.reset();
@@ -165,7 +253,18 @@ public class Game extends BasicGame {
         ScreenManager.Draw(g);
         g.scale(2, 2);
         g.setColor(Color.white);
-        g.drawImage(Game.cursor, Game.input.getAbsoluteMouseX() / 2.0f - Game.cursor.getWidth() / 2, Game.input.getAbsoluteMouseY() / 2.0f - Game.cursor.getHeight() / 2);
+        //g.drawImage(Game.cursor, Game.input.getAbsoluteMouseX() / 2.0f - Game.cursor.getWidth() / 2, Game.input.getAbsoluteMouseY() / 2.0f - Game.cursor.getHeight() / 2);
+        for(int i = 0; i < MultiControls.numPlayers(); i++)
+        {
+        	g.setColor(playerColors[i]);
+        	g.drawImage(Game.cursor, cursorPos[i].x / 2.0f - Game.cursor.getWidth() / 2, cursorPos[i].y / 2.0f - Game.cursor.getHeight() / 2,playerColors[i]);
+        	if(ScreenManager.currentScreen instanceof ScreenGame)
+        		break;
+        	g.scale(1 / 2f, 1 / 2f);
+        	drawStringCentered(g,i+1+"",cursorPos[i].x - 0f,cursorPos[i].y - 10f);
+            g.scale(2, 2);
+        }
+        g.setColor(Color.white);
         g.scale(1 / 2f, 1 / 2f);
     }
 
@@ -249,6 +348,7 @@ public class Game extends BasicGame {
         
         ScreenManager.AddScreen("title", new ScreenTitle());
         ScreenManager.AddScreen("game", new ScreenGame());
+        ScreenManager.AddScreen("multiplayergame", new ScreenMultiplayerGame());
         ScreenManager.AddScreen("pause", new ScreenPaused());
         ScreenManager.AddScreen("end", new ScreenEnd());
         ScreenManager.AddScreen("options", new ScreenOptions());

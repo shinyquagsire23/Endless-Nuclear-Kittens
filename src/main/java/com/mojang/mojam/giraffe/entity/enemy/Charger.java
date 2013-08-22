@@ -1,11 +1,14 @@
 package com.mojang.mojam.giraffe.entity.enemy;
 
+import java.util.Random;
+
 import com.mojang.mojam.giraffe.Game;
 import com.mojang.mojam.giraffe.animator.Direction;
 import com.mojang.mojam.giraffe.animator.DirectionalAnimator;
 import com.mojang.mojam.giraffe.animator.DirectionalType;
 import com.mojang.mojam.giraffe.entity.Mattis;
 import com.mojang.mojam.giraffe.entity.graphic.KittenPoof;
+
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
@@ -16,6 +19,7 @@ public class Charger extends AbstractEnemy {
     private DirectionalAnimator current;
 
     private Mattis mattis;
+    private Mattis[] mattisi;
     private double angle;
     private boolean charged = false;
     private int time = 0;
@@ -25,9 +29,14 @@ public class Charger extends AbstractEnemy {
     private static final int CHARGING_TIME = 2000;
     private static final int KAMIKAZE_TIME = 1000;
 
-    public Charger(Vector2f startPos, Mattis mattis) {
+    public Charger(Vector2f startPos, Mattis[] mattis2) {
         super(startPos, 48 / 4, 40);
-        this.mattis = mattis;
+        Random r = new Random();
+        int target = 0;
+        while(mattis2[target].isDead())
+        	target = r.nextInt(Game.numPlayers);
+        this.mattis = mattis2[target];
+        this.mattisi = mattis2;
 
         animator = new DirectionalAnimator(DirectionalType.FOUR_ROT, true);
         animator.load("kitten_05.png", 48, 48);
@@ -47,7 +56,7 @@ public class Charger extends AbstractEnemy {
 
     @Override
     public AbstractEnemy copy() {
-        return new Charger(getPosition(), mattis);
+        return new Charger(getPosition(), mattisi);
     }
 
     @Override

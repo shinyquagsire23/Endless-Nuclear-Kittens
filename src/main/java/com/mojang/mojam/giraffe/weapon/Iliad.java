@@ -15,7 +15,7 @@ public class Iliad extends AbstractWeapon {
     private static final int MAX_LEVEL = 16;
     private static final int SPREAD_PER_POWER = 10;
 
-    public Iliad(Mattis mattis, int power) {
+    public Iliad(Mattis[] mattis, int power) {
         super(mattis, power, "box_homing.png");
     }
 
@@ -30,7 +30,7 @@ public class Iliad extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_ROCKETLAUNCH);
         List<Projectile> result = new ArrayList<Projectile>();
 
@@ -40,7 +40,7 @@ public class Iliad extends AbstractWeapon {
         float spread = (float) cone / bullets;
 
         for (int i = 0; i < bullets; i++) {
-            final OdysseyRocket bullet = new OdysseyRocket(mattis.getGunX(), mattis.getGunY()).setSpeed(mattis.getRotation() + spread * i - (float) cone / 2, 0.5f);
+            final OdysseyRocket bullet = new OdysseyRocket(mattis[player].getGunX(), mattis[player].getGunY()).setSpeed(mattis[player].getRotation() + spread * i - (float) cone / 2, 0.5f);
             result.add(bullet);
         }
         return result;

@@ -25,7 +25,7 @@ public class Blink extends AbstractWeapon {
     public static final Random RANDOM = new Random();
     private Rectangle collider;
 
-    public Blink(Mattis mattis, int power) {
+    public Blink(Mattis[] mattis, int power) {
         super(mattis, power, "box_teleport.png");
     }
 
@@ -34,7 +34,7 @@ public class Blink extends AbstractWeapon {
 
         final Rectangle bounds = Game.INSTANCE.getWorld().getBounds();
 
-        float radius = mattis.getCollider().getRadius();
+        float radius = mattis[0].getCollider().getRadius();
         float minX = bounds.getMinX() + radius;
         float minY = bounds.getMinY() + radius;
 
@@ -54,13 +54,13 @@ public class Blink extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_TELEPORT);
         // Project Mattis forward and explode
-        float x = mattis.getX();
-        float y = mattis.getY();
+        float x = mattis[player].getX();
+        float y = mattis[player].getY();
 
-        float rotation = mattis.getRotation();
+        float rotation = mattis[player].getRotation();
         float dx = RANGE * (float) Math.cos(Math.PI + Math.toRadians(rotation));
         float dy = RANGE * (float) Math.sin(Math.PI + Math.toRadians(rotation));
 
@@ -79,8 +79,8 @@ public class Blink extends AbstractWeapon {
             targetY = destination.getY();
         }
 
-        mattis.setX(targetX);
-        mattis.setY(targetY);
+        mattis[player].setX(targetX);
+        mattis[player].setY(targetY);
 
         Game.INSTANCE.getWorld().addEntity(getBlinkParticles(x, y, targetX, targetY));
         Game.INSTANCE.getWorld().addEntity(new BlinkPortal(x, y, targetX, targetY));

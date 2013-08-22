@@ -4,6 +4,7 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
 import org.zzl.minegaming.engine.IGameObject;
+import org.zzl.minegaming.engine.MultiControls;
 import org.zzl.minegaming.engine.ScreenManager;
 
 import com.mojang.mojam.giraffe.Game;
@@ -13,7 +14,7 @@ public class ScreenEnd implements IGameObject
 	@Override
 	public void Update(int delta)
 	{
-		if (Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON)) 
+		if (MultiControls.isLeftMouseMenu()) 
 		{
             Game.gameRunning = false;
             Game.hasStarted = false;

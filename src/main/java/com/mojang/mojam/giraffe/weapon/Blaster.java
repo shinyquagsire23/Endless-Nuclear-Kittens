@@ -13,7 +13,7 @@ import java.util.List;
 public class Blaster extends AbstractWeapon {
     private final float SPACING = 11f;
 
-    public Blaster(final Mattis mattis, int power) {
+    public Blaster(final Mattis[] mattis, int power) {
         super(mattis, power, "box_blaster.png");
     }
 
@@ -28,7 +28,7 @@ public class Blaster extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_BLASTER, 1.0f, 0.1f);
         final List<Projectile> result = new ArrayList<Projectile>();
         int bullets = power;
@@ -37,7 +37,7 @@ public class Blaster extends AbstractWeapon {
 
         for (int i = 0; i < bullets; i++) {
             final float offset = SPACING * i - middle;
-            final Projectile bullet = new Bullet(mattis.getGunX(offset), mattis.getGunY(offset)).setSpeed(mattis.getRotation(), 0.8f);
+            final Projectile bullet = new Bullet(mattis[player].getGunX(offset), mattis[player].getGunY(offset)).setSpeed(mattis[player].getRotation(), 0.8f);
             result.add(bullet);
         }
 

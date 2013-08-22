@@ -1,5 +1,7 @@
 package com.mojang.mojam.giraffe.entity.enemy;
 
+import java.util.Random;
+
 import com.mojang.mojam.giraffe.Game;
 import com.mojang.mojam.giraffe.Util;
 import com.mojang.mojam.giraffe.animator.Direction;
@@ -16,13 +18,19 @@ public class Boss extends AbstractEnemy {
 
     private float speed = 1 / 16f;
     private Mattis mattis;
+    private Mattis[] mattisi;
     private double seekAngle;
     private double angle;
     private double turnspeed;
 
-    public Boss(Vector2f startPos, Mattis mattis) {
+    public Boss(Vector2f startPos, Mattis[] mattis2) {
         super(startPos, 32, 2500);
-        this.mattis = mattis;
+        Random r = new Random();
+        int target = 0;
+        while(mattis2[target].isDead())
+        	target = r.nextInt(Game.numPlayers);
+        this.mattis = mattis2[target];
+        this.mattisi = mattis2;
 
         animator = new DirectionalAnimator(DirectionalType.FOUR_ROT, true);
         animator.load("kitten_bot.png", 78, 80);
@@ -36,7 +44,7 @@ public class Boss extends AbstractEnemy {
 
     @Override
     public AbstractEnemy copy() {
-        return new Boss(getPosition(), mattis);
+        return new Boss(getPosition(), mattisi);
     }
 
     @Override

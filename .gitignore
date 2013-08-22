@@ -34,7 +34,6 @@ nbproject
 *.iws
 .idea/
 
-*.png
 .classpath
 *.so
 *.*~

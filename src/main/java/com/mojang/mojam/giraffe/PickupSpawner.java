@@ -10,7 +10,7 @@ import java.util.List;
 public class PickupSpawner {
     final List<Weapon> weapons = new ArrayList<Weapon>();
 
-    public PickupSpawner(Mattis mattis) {
+    public PickupSpawner(Mattis[] mattis) {
         weapons.add(new Blaster(mattis, 1));
         weapons.add(new Shotgun(mattis, 1));
         weapons.add(new Nuke(mattis, 1));

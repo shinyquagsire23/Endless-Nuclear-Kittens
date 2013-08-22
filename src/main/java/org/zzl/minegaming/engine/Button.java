@@ -14,6 +14,7 @@ public class Button implements IGameObject
 	private float height;
 	private String text;
 	private boolean hover = false;
+	private boolean pressed = false;
 	private ButtonAction action;
 	
 	
@@ -88,9 +89,9 @@ public class Button implements IGameObject
 	@Override
 	public void Update(int delta)
 	{
-		if(Game.input.getAbsoluteMouseX() >= this.x - (width - width / 4) && Game.input.getAbsoluteMouseX() < this.x + width - 16)
+		if(Game.cursorPos[0].x >= this.x - (width - width / 4) && Game.cursorPos[0].x < this.x + width - 16)
 		{
-			if(Game.input.getAbsoluteMouseY() >= this.y - 8 && Game.input.getAbsoluteMouseY() < this.y + 64 + 8)
+			if(Game.cursorPos[0].y >= this.y - 8 && Game.cursorPos[0].y < this.y + 64 + 8)
 			{
 				if(hover == false)
 					action.hover();
@@ -108,12 +109,7 @@ public class Button implements IGameObject
 			if(hover == true)
 				action.unhover();
 			hover = false;
-		}
-		
-		System.out.println(hover + " " + Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON));
-		if(hover && Game.input.isMousePressed(Input.MOUSE_LEFT_BUTTON))
-			action.click();
-				
+		}			
 	}
 	
 	public void sendClick()

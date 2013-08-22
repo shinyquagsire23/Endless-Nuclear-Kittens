@@ -6,11 +6,11 @@ import org.newdawn.slick.Color;
 import org.newdawn.slick.SpriteSheet;
 
 public abstract class AbstractWeapon implements Weapon {
-    protected final Mattis mattis;
+    protected final Mattis[] mattis;
     protected int power;
     protected SpriteSheet pickupSheet;
 
-    public AbstractWeapon(Mattis mattis, int power, String pickupSheetPath) {
+    public AbstractWeapon(Mattis[] mattis, int power, String pickupSheetPath) {
         this.mattis = mattis;
         setPower(power);
         pickupSheet = Util.loadSpriteSheet(pickupSheetPath, 38, 59);

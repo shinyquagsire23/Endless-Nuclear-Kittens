@@ -11,7 +11,7 @@ import java.util.List;
 
 public class FlameThrower extends AbstractWeapon {
 
-    public FlameThrower(Mattis mattis, int power) {
+    public FlameThrower(Mattis[] mattis, int power) {
         super(mattis, power, "box_flamethrower.png");
     }
 
@@ -26,10 +26,10 @@ public class FlameThrower extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_FLAMETHROWER, 1.0f, 0.03f);
         power--;
-        final Flame flame = new Flame(mattis.getGunX(), mattis.getGunY(), mattis.getRotation());
+        final Flame flame = new Flame(mattis[player].getGunX(), mattis[player].getGunY(), mattis[player].getRotation());
 
         return Arrays.asList(flame);
     }

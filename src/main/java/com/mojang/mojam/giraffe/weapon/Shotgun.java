@@ -15,7 +15,7 @@ public class Shotgun extends AbstractWeapon {
     private static final int SPREAD_PER_POWER = 5;
     private static final int SPREAD_DECREASE_PER_OVERPOWER = 3;
 
-    public Shotgun(Mattis mattis, int power) {
+    public Shotgun(Mattis[] mattis, int power) {
         super(mattis, power, "box_shotgun.png");
     }
 
@@ -30,9 +30,9 @@ public class Shotgun extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_SHOTGUN);
-        mattis.knockback(16);
+        mattis[player].knockback(16);
         List<Projectile> result = new ArrayList<Projectile>();
 
         int bullets = 12 + 3 * Math.min(MAX_LEVEL, power);
@@ -41,8 +41,8 @@ public class Shotgun extends AbstractWeapon {
         float spread = (float) cone / bullets;
 
         for (int i = 0; i < bullets; i++) {
-            final ShotgunPellet bullet = new ShotgunPellet(mattis.getGunX(), mattis.getGunY());
-            bullet.setSpeed(mattis.getRotation() + spread * i - (float) cone / 2, 0.8f);
+            final ShotgunPellet bullet = new ShotgunPellet(mattis[player].getGunX(), mattis[player].getGunY());
+            bullet.setSpeed(mattis[player].getRotation() + spread * i - (float) cone / 2, 0.8f);
             result.add(bullet);
         }
         return result;

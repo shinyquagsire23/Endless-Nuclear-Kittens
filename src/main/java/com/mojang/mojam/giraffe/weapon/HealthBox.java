@@ -8,7 +8,7 @@ import java.util.Collections;
 import java.util.List;
 
 public class HealthBox extends AbstractWeapon {
-    public HealthBox(final Mattis mattis, int power) {
+    public HealthBox(final Mattis[] mattis, int power) {
         super(mattis, power, "box_health.png");
     }
 
@@ -23,7 +23,7 @@ public class HealthBox extends AbstractWeapon {
     }
 
     @Override
-    public List<? extends CollidingEntity> shoot() {
+    public List<? extends CollidingEntity> shoot(int player) {
         return Collections.emptyList();
     }
 
