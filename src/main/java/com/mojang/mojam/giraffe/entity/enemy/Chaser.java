@@ -26,7 +26,7 @@ public class Chaser extends AbstractEnemy {
     public Chaser(Vector2f startPos, Mattis[] mattis2) {
         super(startPos, 48 / 4, 100);
         Random r = new Random();
-        int target = 0;
+        int target = r.nextInt(Game.numPlayers);;
         while(mattis2[target].isDead())
         	target = r.nextInt(Game.numPlayers);
         this.mattis = mattis2[target];
