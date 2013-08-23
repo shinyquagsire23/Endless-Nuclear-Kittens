@@ -42,7 +42,7 @@ public class Flame extends BaseProjectile {
 
     @Override
     public int getDamage() {
-        return 200;
+        return 30;
     }
 
     @Override
