@@ -40,7 +40,7 @@ public class Iliad extends AbstractWeapon {
         float spread = (float) cone / bullets;
 
         for (int i = 0; i < bullets; i++) {
-            final OdysseyRocket bullet = new OdysseyRocket(mattis[player].getGunX(), mattis[player].getGunY()).setSpeed(mattis[player].getRotation() + spread * i - (float) cone / 2, 0.5f);
+            final OdysseyRocket bullet = new OdysseyRocket(mattis[player].getGunX(), mattis[player].getGunY(),mattis[player]).setSpeed(mattis[player].getRotation() + spread * i - (float) cone / 2, 0.5f);
             result.add(bullet);
         }
         return result;

@@ -33,7 +33,6 @@ public class ScreenTitle implements IGameObject
 	private int titleMin = -512;
 	private int wordsMin = -256;
 	private static int scrollSpeed = 16;
-	private int rumbleTimer = 500;
 	private static boolean begin = false;
 	private static boolean widescreen = false;
 	private static boolean showMenu = false;
@@ -62,8 +61,8 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
-				Controllers.getController(0).setRumblerStrength(0, 50f);
-				rumbleTimer = 100;
+				MultiControls.rumble(0,50.0f);
+				Game.rumbleTimer = 100;
 			}
 			
 			public void click()
@@ -82,8 +81,8 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
-				Controllers.getController(0).setRumblerStrength(0, 50f);
-				rumbleTimer = 100;
+				MultiControls.rumble(0,50.0f);
+				Game.rumbleTimer = 100;
 			}
 			
 			public void click()
@@ -102,8 +101,8 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
-				Controllers.getController(0).setRumblerStrength(0, 50f);
-				rumbleTimer = 100;
+				MultiControls.rumble(0,50.0f);
+				Game.rumbleTimer = 100;
 			}
 			
 			public void click()
@@ -122,8 +121,8 @@ public class ScreenTitle implements IGameObject
 			public void hover()
 			{
 				Game.playSound(Game.BUTTON_HOVER);
-				Controllers.getController(0).setRumblerStrength(0, 50f);
-				rumbleTimer = 100;
+				MultiControls.rumble(0,50.0f);
+				Game.rumbleTimer = 100;
 			}
 			
 			public void click()
@@ -151,12 +150,6 @@ public class ScreenTitle implements IGameObject
         if (Game.input.isKeyPressed(Input.KEY_ESCAPE)) {
             System.exit(0);
         }
-        
-		rumbleTimer -= delta;
-		if(rumbleTimer <= 0)
-		{
-			Controllers.getController(0).setRumblerStrength(0, 0.0f);
-		}
 		
 		if(begin)
 		{
@@ -239,7 +232,7 @@ public class ScreenTitle implements IGameObject
 		if (!Game.gameRunning || !active) 
 		{
 			g.setColor(new Color(0.0f, 0.1f, 0.2f, 0.6f));
-			g.fillRect(0, 0, Game.SCREENSIZE.x, Game.SCREENSIZE.y);
+			g.fillRect(0, 0, Game.SCREENSIZE.x, Game.REALSCREENSIZE.y);
 			g.scale(2f, 2f);
 			g.drawImage(title, tX, -10 + (Game.hasStarted && active ? -20 : 0));
 			g.scale(1 / 2f, 1 / 2f);

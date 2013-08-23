@@ -1,8 +1,10 @@
 package com.mojang.mojam.giraffe.entity.projectile;
 
 import com.mojang.mojam.giraffe.Util;
+import com.mojang.mojam.giraffe.entity.Mattis;
 import com.mojang.mojam.giraffe.entity.graphic.Graphic;
 import com.mojang.mojam.giraffe.entity.graphic.Poof;
+
 import org.newdawn.slick.Animation;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.SpriteSheet;
@@ -19,9 +21,11 @@ public class ShotgunPellet extends BaseProjectile {
     private Animation animation;
     private final Animation animation2;
     private int age = 0;
+    private final Mattis owner;
 
-    public ShotgunPellet(float x, float y) {
+    public ShotgunPellet(float x, float y, Mattis owner) {
         super(x, y, new Circle(x, y, SIZE / 2));
+        this.owner = owner;
         damage = 15;
 
         // Sparkly bit
@@ -86,4 +90,10 @@ public class ShotgunPellet extends BaseProjectile {
     public boolean isFinished() {
         return age > 350;
     }
+
+
+	public int getOwnerNum()
+	{
+		return owner.getPlayerNum();
+	}
 }

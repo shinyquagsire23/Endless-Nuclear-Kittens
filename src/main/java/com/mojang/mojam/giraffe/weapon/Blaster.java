@@ -37,7 +37,7 @@ public class Blaster extends AbstractWeapon {
 
         for (int i = 0; i < bullets; i++) {
             final float offset = SPACING * i - middle;
-            final Projectile bullet = new Bullet(mattis[player].getGunX(offset), mattis[player].getGunY(offset)).setSpeed(mattis[player].getRotation(), 0.8f);
+            final Projectile bullet = new Bullet(mattis[player].getGunX(offset), mattis[player].getGunY(offset),mattis[player]).setSpeed(mattis[player].getRotation(), 0.8f);
             result.add(bullet);
         }
 

@@ -1,8 +1,10 @@
 package com.mojang.mojam.giraffe.entity.projectile;
 
 import com.mojang.mojam.giraffe.Util;
+import com.mojang.mojam.giraffe.entity.Mattis;
 import com.mojang.mojam.giraffe.entity.graphic.BulletHit;
 import com.mojang.mojam.giraffe.entity.graphic.Graphic;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Image;
@@ -12,10 +14,12 @@ public class Bullet extends BaseProjectile {
     private static final Image BULLET = Util.loadImage("bullet_01_16.png", Color.white);
 
     private final int damage;
+    private final Mattis owner;
 
-    public Bullet(float x, float y) {
+    public Bullet(float x, float y, Mattis owner) {
         super(x, y, new Circle(x, y, 5));
         damage = 12;
+        this.owner = owner;
     }
 
     public void draw(Graphics g) {
@@ -26,6 +30,10 @@ public class Bullet extends BaseProjectile {
         g.rotate(x, y, -angle);
     }
 
+    public int getOwnerNum()
+    {
+    	return owner.getPlayerNum();
+    }
 
     public int getDamage() {
         return damage;

@@ -15,6 +15,7 @@ import org.newdawn.slick.SpriteSheet;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
+import org.zzl.minegaming.engine.MultiControls;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -240,12 +241,16 @@ public class World {
             for (Hurtable target : enemies) {
                 if (!deadEnemies.contains(target) && target.getCollider().intersects(projectile.getCollider())) {
                     Game.playSound(Game.SOUND_BULLET_HIT, 1.0f, 0.8f);
+                    MultiControls.rumble(projectile.getOwnerNum(), 0.2f);
                     addEntity(projectile.onPoof());
 
                     deadProjectiles.add(projectile);
 
                     if (target.hurt(projectile, projectile.getDamage(), projectile.getDx(), projectile.getDy())) {
                         explode(target, 100, 8);
+                        float distance = new Vector2f(target.getX(), target.getY()).distance(new Vector2f(mattis[projectile.getOwnerNum()].getX(),mattis[projectile.getOwnerNum()].getY()));
+                        
+                        MultiControls.rumble(projectile.getOwnerNum(),4f - (distance * 0.028f),400);
                         deadEnemies.add(target);
                     }
 

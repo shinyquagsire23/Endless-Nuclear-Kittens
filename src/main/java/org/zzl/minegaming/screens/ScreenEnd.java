@@ -1,5 +1,7 @@
 package org.zzl.minegaming.screens;
 
+import java.math.BigInteger;
+
 import org.newdawn.slick.Color;
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.Input;
@@ -33,7 +35,7 @@ public class ScreenEnd implements IGameObject
 		g.drawString("SCORE: " + Game.getScore(), 10, 10);
 		
         g.setColor(new Color(0.0f, 0.1f, 0.2f, 0.6f));
-        g.fillRect(0, 0, Game.SCREENSIZE.x, Game.SCREENSIZE.y);
+        g.fillRect(0, 0, Game.SCREENSIZE.x, Game.REALSCREENSIZE.y);
         g.scale(2f, 2f);
         g.drawImage(ScreenTitle.title, Game.SCREENSIZE.x / 4 - ScreenTitle.title.getWidth() / 2, -10);
         g.scale(1 / 2f, 1 / 2f);
@@ -44,9 +46,9 @@ public class ScreenEnd implements IGameObject
         float jump = 30;
         Game.drawStringCentered(g, "OH NO! TOO MANY KITTENS!", Game.SCREENSIZE.x / 2, y);
         y += jump;
-        Game.drawStringCentered(g, "You killed " + Game.getFrags() + " kittens", Game.SCREENSIZE.x / 2, y);
+        Game.drawStringCentered(g, "You killed " + Game.getFrags() + " kitten" + (Game.getFrags().compareTo(BigInteger.valueOf(1)) == 1 || Game.getFrags().compareTo(BigInteger.valueOf(0)) == 0 ? "s" : ""), Game.SCREENSIZE.x / 2, y);
         y += jump;
-        Game.drawStringCentered(g, "and " + Game.getBossFrags() + " kitten bots", Game.SCREENSIZE.x / 2, y);
+        Game.drawStringCentered(g, "and " + Game.getBossFrags() + " kitten bot" + (Game.getBossFrags().compareTo(BigInteger.valueOf(1)) == 1 || Game.getBossFrags().compareTo(BigInteger.valueOf(0)) == 0 ? "s" : ""), Game.SCREENSIZE.x / 2, y);
         y += jump * 1.8f;
         Game.drawStringCentered(g, "SCORE: " + Game.getScore(), Game.SCREENSIZE.x / 2, y);
         y += jump * 1.8f;

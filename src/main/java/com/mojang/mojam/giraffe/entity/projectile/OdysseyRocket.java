@@ -6,9 +6,11 @@ import com.mojang.mojam.giraffe.animator.Direction;
 import com.mojang.mojam.giraffe.animator.DirectionalAnimator;
 import com.mojang.mojam.giraffe.animator.DirectionalType;
 import com.mojang.mojam.giraffe.entity.Entity;
+import com.mojang.mojam.giraffe.entity.Mattis;
 import com.mojang.mojam.giraffe.entity.graphic.Graphic;
 import com.mojang.mojam.giraffe.entity.graphic.MissileTrail;
 import com.mojang.mojam.giraffe.entity.graphic.Poof;
+
 import org.newdawn.slick.Graphics;
 import org.newdawn.slick.geom.Circle;
 import org.newdawn.slick.geom.Vector2f;
@@ -33,9 +35,11 @@ public class OdysseyRocket extends BaseProjectile {
 
     private int trailDelay = 10;
     private int timeUntilTrail = trailDelay;
+    private final Mattis owner;
 
-    public OdysseyRocket(float x, float y) {
+    public OdysseyRocket(float x, float y, Mattis owner) {
         super(x, y, new Circle(x, y, SIZE / 2));
+        this.owner = owner;
         damage = 34;
         turnspeed = 0;
 
@@ -112,4 +116,10 @@ public class OdysseyRocket extends BaseProjectile {
     public Graphic onPoof() {
         return new Poof(x, y);
     }
+
+
+	public int getOwnerNum()
+	{
+		return owner.getPlayerNum();
+	}
 }

@@ -29,7 +29,7 @@ public class FlameThrower extends AbstractWeapon {
     public List<? extends CollidingEntity> shoot(int player) {
         Game.playSound(Game.SOUND_FLAMETHROWER, 1.0f, 0.03f);
         power--;
-        final Flame flame = new Flame(mattis[player].getGunX(), mattis[player].getGunY(), mattis[player].getRotation());
+        final Flame flame = new Flame(mattis[player].getGunX(), mattis[player].getGunY(), mattis[player].getRotation(),mattis[player]);
 
         return Arrays.asList(flame);
     }
@@ -56,6 +56,6 @@ public class FlameThrower extends AbstractWeapon {
 
     @Override
     public double getWeight() {
-        return 2f;
+        return 1f;
     }
 }

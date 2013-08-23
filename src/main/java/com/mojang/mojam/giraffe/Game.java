@@ -6,6 +6,7 @@ import org.lwjgl.LWJGLException;
 import org.lwjgl.input.Controllers;
 import org.lwjgl.opengl.Display;
 import org.newdawn.slick.*;
+import org.newdawn.slick.geom.Rectangle;
 import org.newdawn.slick.geom.Vector2f;
 import org.newdawn.slick.opengl.PNGDecoder;
 import org.newdawn.slick.util.ResourceLoader;
@@ -32,7 +33,10 @@ public class Game extends BasicGame {
     public static Font FONT_LARGE;
     public static Font[] FONT_SCORES = new Font[5];
     public static boolean fullscreen = true;
+    public static boolean wideFullHybrid = false;
+    public static boolean roundedCorners = true; //Do we want to round off the corners in hybrid mode?
     public static Vector2f SCREENSIZE = new Vector2f(1024, 768);
+    public static Vector2f REALSCREENSIZE = new Vector2f(1024, 768);
 
     public static final int SOUND_BLASTER = 0;
     public static final int SOUND_EXPLOSION = 1;
@@ -44,10 +48,13 @@ public class Game extends BasicGame {
     public static final int SOUND_BULLET_HIT = 7;
     public static final int SOUND_PICKUP = 8;
     public static final int BUTTON_HOVER = 9;
+    public static AppGameContainer appContainer;
     private static Sound[] sounds = new Sound[10];
     
     private static Image starfield;
     private static Image[] stars = new Image[3];
+    
+    private static Image screen;
 
     private static Mattis[] mattis;
     public static int numPlayers = 1;
@@ -61,6 +68,8 @@ public class Game extends BasicGame {
 
     public static boolean hasStarted = false;
     public static boolean gameRunning = false;
+    
+    public static int rumbleTimer = 0;
 
     public static final Game INSTANCE = new Game();
 
@@ -87,12 +96,16 @@ public class Game extends BasicGame {
         
         for(int i = 0; i < MultiControls.numPlayers(); i++)
         {
-        	cursorPos[i] = new Vector2f(0,0);
-        	for(int j = 0; j < 7; j++)
+        	try
         	{
-        		MultiControls.getController(i).setDeadZone(j, 0.2f);
-        		MultiControls.getController(i).setDeadZone(j, 0.2f);
+        		cursorPos[i] = new Vector2f(0,0);
+        		for(int j = 0; j < 7; j++)
+        		{
+        			MultiControls.getController(i).setDeadZone(j, 0.2f);
+        			MultiControls.getController(i).setDeadZone(j, 0.2f);
+        		}
         	}
+        	catch(Exception e){}
         }
         
         System.out.println(input.getControllerCount() + " controllers found!");
@@ -123,6 +136,8 @@ public class Game extends BasicGame {
         stars[0] = Util.loadImage("stars_02.png", Color.white);
         stars[1] = Util.loadImage("stars_03.png", Color.white);
         stars[2] = Util.loadImage("stars_04.png", Color.white);
+        
+        screen = Util.loadImage("screen.png");
 
         sounds[SOUND_BLASTER] = new Sound("blaster.wav");
         sounds[SOUND_EXPLOSION] = new Sound("explosion.wav");
@@ -167,6 +182,12 @@ public class Game extends BasicGame {
         	gc.setMouseGrabbed(false);
             return; //If the game isn't focus or the last frame took longer than 1 second to render, skip this one
         }
+        
+		rumbleTimer -= delta;
+		if(rumbleTimer <= 0)
+		{
+			MultiControls.unrumble();
+		}
 
         if (input.isKeyPressed(Input.KEY_END)) {
             System.exit(0);
@@ -183,11 +204,6 @@ public class Game extends BasicGame {
         			cursorPos[i].y = input.getAbsoluteMouseY();
         			continue;
         		}
-            	for(int j = 0; j < 7; j++)
-            	{
-            		//MultiControls.getController(i).setDeadZone(j, 0f);
-            		//MultiControls.getController(i).setDeadZone(j, 0f);
-            	}
             	
         		if(MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) != 0)
         			cursorPos[i].x = mattis[i].getX() * 2 - world.getCameraPosition().x * 2 + MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) * SCREENSIZE.x / 4;
@@ -211,11 +227,6 @@ public class Game extends BasicGame {
         			cursorPos[i].y = input.getAbsoluteMouseY();
         			continue;
         		}
-        		for(int j = 0; j < 7; j++)
-            	{
-            		MultiControls.getController(i).setDeadZone(j, 0.2f);
-            		MultiControls.getController(i).setDeadZone(j, 0.2f);
-            	}
         		cursorPos[i].x += MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_X) * 20;
         		cursorPos[i].y += MultiControls.getAxisValue(i,XBOXButtons.AX_RIGHT_STICK_Y) * 20;
         		cursorPos[i].x += MultiControls.getAxisValue(i,XBOXButtons.AX_LEFT_STICK_X) * 20;
@@ -238,6 +249,17 @@ public class Game extends BasicGame {
 
     public static void reset()
     {
+        if(fullscreen && wideFullHybrid) //Use fullscreen mode, but have game emulate a fullscreen monitor on a widescreen resolution
+        {
+        	SCREENSIZE = new Vector2f(1024 * appContainer.getScreenHeight() / 768, appContainer.getScreenHeight() - 64);
+        	REALSCREENSIZE = new Vector2f(appContainer.getScreenWidth(), appContainer.getScreenHeight());
+        }
+        else if(fullscreen) //True fullscreen, edge to edge up and down
+        {
+        	SCREENSIZE = new Vector2f(appContainer.getScreenWidth(), appContainer.getScreenHeight());
+        	REALSCREENSIZE = new Vector2f(appContainer.getScreenWidth(), appContainer.getScreenHeight());
+        }
+        
     	mattis = new Mattis[numPlayers];
     	for(int i = 0; i < numPlayers; i++)
     	{
@@ -250,6 +272,8 @@ public class Game extends BasicGame {
 
     @Override
     public void render(GameContainer gc, Graphics g) throws SlickException {
+    	g.pushTransform();
+        g.translate((REALSCREENSIZE.x - SCREENSIZE.x) / 2, 0);
         ScreenManager.Draw(g);
         g.scale(2, 2);
         g.setColor(Color.white);
@@ -264,8 +288,17 @@ public class Game extends BasicGame {
         	drawStringCentered(g,i+1+"",cursorPos[i].x - 0f,cursorPos[i].y - 10f);
             g.scale(2, 2);
         }
-        g.setColor(Color.white);
         g.scale(1 / 2f, 1 / 2f);
+        g.popTransform();
+        
+        //Cover everything with black bars to give it the fullscreen effect
+        g.setColor(Color.black);
+        g.fillRect(0, 0, (REALSCREENSIZE.x - SCREENSIZE.x) / 2, REALSCREENSIZE.y);
+        g.fillRect(REALSCREENSIZE.x - (REALSCREENSIZE.x - SCREENSIZE.x) / 2, 0, (REALSCREENSIZE.x - SCREENSIZE.x) / 2, REALSCREENSIZE.y);
+        g.texture(new Rectangle((REALSCREENSIZE.x - SCREENSIZE.x) / 2,0,SCREENSIZE.x,REALSCREENSIZE.y), screen,true);
+        //g.fillRect(0, 0, REALSCREENSIZE.x, 32);
+        //g.fillRect(0, REALSCREENSIZE.y - 32, REALSCREENSIZE.x, 32);
+        g.setColor(Color.white);
     }
 
     public static void drawWorld(Graphics g)
@@ -326,6 +359,7 @@ public class Game extends BasicGame {
 
     public static void main(String[] args) throws SlickException {
         AppGameContainer app = new AppGameContainer(INSTANCE);
+        appContainer = app;
         for(String s : args)
         {
         	if(s.equalsIgnoreCase("-f") || s.equalsIgnoreCase("--fullscreen"))
@@ -343,8 +377,16 @@ public class Game extends BasicGame {
             e.printStackTrace();
         }
        
-        if(fullscreen)
+        if(fullscreen && wideFullHybrid) //Use fullscreen mode, but have game emulate a fullscreen monitor on a widescreen resolution
+        {
+        	SCREENSIZE = new Vector2f(1024 * app.getScreenHeight() / 768, app.getScreenHeight());
+        	REALSCREENSIZE = new Vector2f(app.getScreenWidth(), app.getScreenHeight());
+        }
+        else if(fullscreen) //True fullscreen, edge to edge up and down
+        {
         	SCREENSIZE = new Vector2f(app.getScreenWidth(), app.getScreenHeight());
+        	REALSCREENSIZE = new Vector2f(app.getScreenWidth(), app.getScreenHeight());
+        }
         
         ScreenManager.AddScreen("title", new ScreenTitle());
         ScreenManager.AddScreen("game", new ScreenGame());
@@ -353,7 +395,10 @@ public class Game extends BasicGame {
         ScreenManager.AddScreen("end", new ScreenEnd());
         ScreenManager.AddScreen("options", new ScreenOptions());
         ScreenManager.ChangeState("title");
-        app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
+        if(fullscreen)
+        	app.setDisplayMode((int) app.getScreenWidth(), (int) REALSCREENSIZE.y, fullscreen);
+        else
+        	app.setDisplayMode((int) SCREENSIZE.x, (int) SCREENSIZE.y, fullscreen);
         app.start();
     }
 }

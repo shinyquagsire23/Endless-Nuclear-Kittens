@@ -41,7 +41,7 @@ public class Shotgun extends AbstractWeapon {
         float spread = (float) cone / bullets;
 
         for (int i = 0; i < bullets; i++) {
-            final ShotgunPellet bullet = new ShotgunPellet(mattis[player].getGunX(), mattis[player].getGunY());
+            final ShotgunPellet bullet = new ShotgunPellet(mattis[player].getGunX(), mattis[player].getGunY(),mattis[player]);
             bullet.setSpeed(mattis[player].getRotation() + spread * i - (float) cone / 2, 0.8f);
             result.add(bullet);
         }

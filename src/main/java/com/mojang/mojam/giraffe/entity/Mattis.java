@@ -359,8 +359,9 @@ public class Mattis extends BaseEntity implements Hurtable {
             world.addEntity(entities);
             isShooting = entities == null || !entities.isEmpty();
         }
-        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyPressed(Input.KEY_SPACE) : MultiControls.getController(player).isButtonPressed(XBOXButtons.BTN_RIGHT_THUMB))) {
-            List<? extends CollidingEntity> entities = shoot(WeaponSlot.PANIC);
+        if ((player == 0 && MultiControls.getMode() == MultiControls.P2X_CONTROLLER ? input.isKeyPressed(Input.KEY_SPACE) : MultiControls.getController(player).isButtonPressed(XBOXButtons.BTN_LEFT_THUMB_3) || MultiControls.getController(player).isButtonPressed(XBOXButtons.BTN_RIGHT_THUMB_3) || MultiControls.getController(player).isButtonPressed(XBOXButtons.BTN_X))) {
+            MultiControls.rumble(player, 4f, 400);
+        	List<? extends CollidingEntity> entities = shoot(WeaponSlot.PANIC);
             world.addEntity(entities);
             isShooting = entities == null || !entities.isEmpty();
         }
